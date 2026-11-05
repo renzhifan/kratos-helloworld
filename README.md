@@ -107,6 +107,73 @@ Test:
 go test ./...
 ```
 
+## 新增资源（Resource）流程
+
+从新增 proto 到对外暴露接口，完整步骤如下。`kratos` 命令负责生成 pb 代码和 service 骨架，
+Wire 负责生成依赖注入代码，**但有两处必须手改**（ProviderSet 和 server 注册），否则接口不会暴露。
+
+### 1. 生成 proto 模板
+
+```bash
+kratos proto add api/helloworld/v1/greeter.proto
+```
+
+### 2. 生成 pb 代码（含 HTTP 绑定和 OpenAPI）
+
+```bash
+make api
+```
+
+会产出 `greeter.pb.go`、`greeter_grpc.pb.go`；如果 proto 里有 `google.api.http` 注解，
+还会额外生成 `greeter_http.pb.go`。
+
+### 3. 生成 service 实现骨架
+
+```bash
+kratos proto server api/helloworld/v1/greeter.proto -t internal/service
+```
+
+会在 `internal/service/` 下生成 `greeter.go`，包含所有 rpc 的空实现。
+如果目标文件已存在，该命令会跳过，不会覆盖；proto 新增 rpc 之后需要自己补方法。
+建议生成后跑一次 `gofmt -w internal/service/greeter.go` 整理缩进。
+
+### 4. 将 service 加入 Wire ProviderSet（手动）
+
+编辑 `internal/service/service.go`，把 `NewGreeterService` 加到 `wire.NewSet` 里：
+
+```go
+var ProviderSet = wire.NewSet(NewTodoService, NewGreeterService)
+```
+
+### 5. 注册到 server（手动）
+
+编辑 `internal/server/grpc.go`（HTTP 同理编辑 `http.go`）：
+
+```go
+func NewGRPCServer(c *conf.Server, todo *service.TodoService, greeter *service.GreeterService) *grpc.Server {
+    ...
+    v1.RegisterTodoServiceServer(srv, todo)
+    helloworldv1.RegisterGreeterServer(srv, greeter)
+    return srv
+}
+```
+
+### 6. 重新生成依赖注入代码
+
+```bash
+wire ./cmd/helloworld
+# 或者
+make generate
+```
+
+会更新 `cmd/helloworld/wire_gen.go`。该文件由 Wire 自动生成，不要手改。
+
+### 常见遗漏
+
+- 第 4 步漏掉：`wire` 会报错找不到 provider。
+- 第 5 步漏掉：编译能通过，但 gRPC/HTTP 服务列表里看不到新接口。
+- 没有 HTTP 注解：不会生成 `_http.pb.go`，`http.go` 里也无需注册。
+
 ## Run Locally
 
 ```bash
