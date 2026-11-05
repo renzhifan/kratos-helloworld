@@ -3,13 +3,81 @@
 
 openapi: 3.0.3
 info:
-    title: TodoService API
-    description: |-
-        TodoService provides a simple CRUD example for managing todo items.
-         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
-         together with AIP-style list filtering, ordering, and pagination.
+    title: ""
     version: 0.0.1
 paths:
+    /v1/encrypt:
+        post:
+            tags:
+                - Encrypt
+            operationId: Encrypt_CreateEncrypt
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.encrypt.v1.CreateEncryptRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.encrypt.v1.CreateEncryptReply'
+    /v1/encrypt/batch:
+        post:
+            tags:
+                - Encrypt
+            operationId: Encrypt_BatchGetEncrypt
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.encrypt.v1.BatchGetEncryptRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.encrypt.v1.BatchGetEncryptReply'
+    /v1/encrypt/{encryptId}:
+        get:
+            tags:
+                - Encrypt
+            operationId: Encrypt_GetEncrypt
+            parameters:
+                - name: encryptId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.encrypt.v1.GetEncryptReply'
+    /v1/ping:
+        get:
+            tags:
+                - Encrypt
+            description: Ping 健康检查探活，免鉴权，HTTP 与 gRPC 均可调用
+            operationId: Encrypt_Ping
+            parameters:
+                - name: message
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.encrypt.v1.PingReply'
     /v1/todos/create:
         post:
             tags:
@@ -227,6 +295,42 @@ paths:
                     content: {}
 components:
     schemas:
+        api.encrypt.v1.BatchGetEncryptReply:
+            type: object
+            properties:
+                data:
+                    type: object
+                    additionalProperties:
+                        type: string
+        api.encrypt.v1.BatchGetEncryptRequest:
+            type: object
+            properties:
+                encryptIds:
+                    type: array
+                    items:
+                        type: string
+        api.encrypt.v1.CreateEncryptReply:
+            type: object
+            properties:
+                encryptId:
+                    type: string
+        api.encrypt.v1.CreateEncryptRequest:
+            type: object
+            properties:
+                originalData:
+                    type: string
+        api.encrypt.v1.GetEncryptReply:
+            type: object
+            properties:
+                originalData:
+                    type: string
+                encryptId:
+                    type: string
+        api.encrypt.v1.PingReply:
+            type: object
+            properties:
+                message:
+                    type: string
         todo.v1.SyncTodoRequest:
             type: object
             properties:
@@ -313,4 +417,9 @@ components:
                          Empty when there are no more results.
             description: TodoSet is a paginated collection of todo items returned by ListTodos.
 tags:
+    - name: Encrypt
     - name: TodoService
+      description: |-
+        TodoService provides a simple CRUD example for managing todo items.
+         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
+         together with AIP-style list filtering, ordering, and pagination.

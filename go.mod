@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	entgo.io/ent v0.14.6
+	github.com/envoyproxy/protoc-gen-validate v1.3.3
 	github.com/go-kratos/aip-go/ents v0.0.0-20260901003907-1ab5471e605b
 	github.com/go-kratos/kratos/contrib/otel/v3 v3.0.0-20261026152050-dd0fb7df1e32
 	github.com/go-kratos/kratos/v3 v3.0.0
