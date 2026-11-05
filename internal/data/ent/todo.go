@@ -4,13 +4,13 @@ package ent
 
 import (
 	"fmt"
+	"helloworld/internal/biz"
+	"helloworld/internal/data/ent/todo"
 	"strings"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"helloworld/internal/biz"
-	"helloworld/internal/data/ent/todo"
 	"github.com/google/uuid"
 )
 

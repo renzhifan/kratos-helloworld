@@ -6,14 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"helloworld/internal/biz"
+	"helloworld/internal/data/ent/predicate"
+	"helloworld/internal/data/ent/todo"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"helloworld/internal/biz"
-	"helloworld/internal/data/ent/predicate"
-	"helloworld/internal/data/ent/todo"
 )
 
 // TodoUpdate is the builder for updating Todo entities.

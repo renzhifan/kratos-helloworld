@@ -6,13 +6,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"helloworld/internal/data/ent/todo"
 	"reflect"
 	"sync"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"helloworld/internal/data/ent/todo"
 )
 
 // ent aliases to avoid import conflicts in user's code.

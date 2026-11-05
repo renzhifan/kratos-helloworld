@@ -9,8 +9,9 @@ import (
 	// required by schema hooks.
 	_ "helloworld/internal/data/ent/runtime"
 
-	"entgo.io/ent/dialect/sql/schema"
 	"helloworld/internal/data/ent/migrate"
+
+	"entgo.io/ent/dialect/sql/schema"
 )
 
 type (

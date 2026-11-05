@@ -10,12 +10,13 @@ import (
 	"reflect"
 
 	"helloworld/internal/data/ent/migrate"
-	"github.com/google/uuid"
+
+	"helloworld/internal/data/ent/todo"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"helloworld/internal/data/ent/todo"
+	"github.com/google/uuid"
 )
 
 // Client is the client that holds all ent builders.

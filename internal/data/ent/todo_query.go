@@ -5,14 +5,14 @@ package ent
 import (
 	"context"
 	"fmt"
+	"helloworld/internal/data/ent/predicate"
+	"helloworld/internal/data/ent/todo"
 	"math"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"helloworld/internal/data/ent/predicate"
-	"helloworld/internal/data/ent/todo"
 	"github.com/google/uuid"
 )
 
