@@ -44,6 +44,12 @@ message Data {
     string addr = 2;
     google.protobuf.Duration read_timeout = 3;
     google.protobuf.Duration write_timeout = 4;
+    // 认证密码，为空表示无需认证。
+    string password = 5;
+    // 逻辑库编号，0 表示默认库。
+    int32 db = 6;
+    // 建立连接的超时时间。
+    google.protobuf.Duration dial_timeout = 7;
   }
   Database database = 1;
   Redis redis = 2;

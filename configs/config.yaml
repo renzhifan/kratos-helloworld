@@ -14,7 +14,10 @@ data:
     debug: true
     auto_migrate: false
   redis:
-    addr: ${REDIS_ADDR:127.0.0.1:6379}
+    addr: r-2zek17pth685l7qy81pd.redis.rds.aliyuncs.com:6379
+    password: "cxrzrLDX9xWznd7S21MJ"
+    db: 16
+    dial_timeout: 1s
     read_timeout: 0.2s
     write_timeout: 0.2s
 logger:
@@ -29,6 +32,6 @@ logger:
 trace:
   # 关闭时不再上报链路数据，但仍在本地生成 trace_id/span_id，
   # 日志里会带上这两个字段。
-  enabled: false
+  enabled: true
   # OTLP/HTTP 上报地址，Jaeger 1.35+ 原生支持，端口 4318。
   endpoint: http://127.0.0.1:4318/v1/traces

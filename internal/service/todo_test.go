@@ -16,7 +16,7 @@ import (
 )
 
 func newTestTodoService() *TodoService {
-	uc := biz.NewTodoUsecase(newFakeTodoRepo())
+	uc := biz.NewTodoUsecase(newFakeTodoRepo(), nil)
 	return NewTodoService(uc)
 }
 

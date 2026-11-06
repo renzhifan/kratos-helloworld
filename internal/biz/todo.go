@@ -54,6 +54,18 @@ type TodoRepo interface {
 	DeleteTodo(context.Context, uuid.UUID) error
 }
 
+// TodoCache caches todo list results. The interface is declared here and
+// implemented in data, so the usecase never talks to Redis directly.
+type TodoCache interface {
+	// Get returns the cached todos for key; the bool reports a hit.
+	Get(context.Context, string) ([]*Todo, bool, error)
+	// Set stores todos under key for ttl.
+	Set(context.Context, string, []*Todo, time.Duration) error
+}
+
+// listCacheTTL bounds how long a cached list page may stay stale after writes.
+const listCacheTTL = 30 * time.Second
+
 // ListOption configures todo list queries.
 type ListOption func(*ListOptions)
 
@@ -95,12 +107,13 @@ func ListLimit(limit int) ListOption {
 
 // TodoUsecase is a Todo usecase.
 type TodoUsecase struct {
-	repo TodoRepo
+	repo  TodoRepo
+	cache TodoCache
 }
 
-// NewTodoUsecase new a Todo usecase.
-func NewTodoUsecase(repo TodoRepo) *TodoUsecase {
-	return &TodoUsecase{repo: repo}
+// NewTodoUsecase new a Todo usecase. A nil cache disables list caching.
+func NewTodoUsecase(repo TodoRepo, cache TodoCache) *TodoUsecase {
+	return &TodoUsecase{repo: repo, cache: cache}
 }
 
 // GetTodo returns a todo by ID.
@@ -114,6 +127,26 @@ func (uc *TodoUsecase) GetTodo(ctx context.Context, id uuid.UUID) (*Todo, error)
 // ListTodos lists todos.
 func (uc *TodoUsecase) ListTodos(ctx context.Context, opts ...ListOption) ([]*Todo, error) {
 	return uc.repo.ListTodos(ctx, opts...)
+}
+
+// ListTodosCached lists todos through the cache: a hit returns the cached page,
+// a miss reads the repo and writes the result back under key. Cache errors
+// degrade to a direct read so a Redis outage does not fail the request.
+func (uc *TodoUsecase) ListTodosCached(ctx context.Context, key string, opts ...ListOption) ([]*Todo, error) {
+	if uc.cache != nil && key != "" {
+		if todos, ok, err := uc.cache.Get(ctx, key); err == nil && ok {
+			return todos, nil
+		}
+	}
+	todos, err := uc.repo.ListTodos(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	if uc.cache != nil && key != "" {
+		// A failed write only costs the next request a repo read.
+		_ = uc.cache.Set(ctx, key, todos, listCacheTTL)
+	}
+	return todos, nil
 }
 
 // CreateTodo creates a todo.

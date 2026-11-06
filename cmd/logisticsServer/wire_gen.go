@@ -24,18 +24,25 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
+	client, cleanup, err := data.NewRedisClient(confData, logger)
 	if err != nil {
 		return nil, nil, err
 	}
+	dataData, cleanup2, err := data.NewData(confData, logger, client)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	todoRepo := data.NewTodoRepo(dataData)
-	todoUsecase := biz.NewTodoUsecase(todoRepo)
+	todoCache := data.NewTodoCache(client)
+	todoUsecase := biz.NewTodoUsecase(todoRepo, todoCache)
 	todoService := service.NewTodoService(todoUsecase)
 	encryptService := service.NewEncryptService()
 	grpcServer := server.NewGRPCServer(confServer, logger, todoService, encryptService)
 	httpServer := server.NewHTTPServer(confServer, logger, todoService, encryptService)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

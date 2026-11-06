@@ -10,20 +10,22 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v3/log"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
+	"github.com/redis/go-redis/v9"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewTodoRepo)
+var ProviderSet = wire.NewSet(NewData, NewRedisClient, NewTodoRepo, NewTodoCache)
 
 // Data holds the long-lived storage clients shared by repos.
 type Data struct {
-	db *ent.Client
+	db  *ent.Client
+	rdb *redis.Client
 }
 
 // NewData opens the database client and returns it with a cleanup function.
-func NewData(c *conf.Data, logger *slog.Logger) (*Data, func(), error) {
+func NewData(c *conf.Data, logger *slog.Logger, rdb *redis.Client) (*Data, func(), error) {
 	dc := c.GetDatabase()
 	drv, err := entsql.Open(dc.GetDriver(), dc.GetSource())
 	if err != nil {
@@ -31,8 +33,7 @@ func NewData(c *conf.Data, logger *slog.Logger) (*Data, func(), error) {
 	}
 	var driver dialect.Driver = drv
 	// Debug mode routes every statement through the service logger so SQL
-	// logs share the request's trace_id/span_id. Debug-level output only, so
-	// raise logger.level to debug to see them.
+	// logs share the request's trace_id/span_id.
 	if dc.GetDebug() {
 		driver = newSQLDriver(driver, logger)
 	}
@@ -51,5 +52,5 @@ func NewData(c *conf.Data, logger *slog.Logger) (*Data, func(), error) {
 			log.Error("failed closing the database", "err", err)
 		}
 	}
-	return &Data{db: db}, cleanup, nil
+	return &Data{db: db, rdb: rdb}, cleanup, nil
 }

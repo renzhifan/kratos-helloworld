@@ -56,6 +56,19 @@ func (s *TodoService) GetTodo(ctx context.Context, req *v1.GetTodoRequest) (*v1.
 	return convertTodoReply(todo), nil
 }
 
+// listTodosWithCache returns one page of todos through the Redis cache: on a
+// hit the repo is skipped, on a miss the usecase reads the repo and writes the
+// page back. req is normalized before this call, so it is part of the key.
+func (s *TodoService) listTodosWithCache(ctx context.Context, req *v1.ListTodosRequest, opts ...biz.ListOption) ([]*biz.Todo, error) {
+	return s.uc.ListTodosCached(ctx, listCacheKey(req), opts...)
+}
+
+// listCacheKey derives a deterministic key from the list request, so each
+// filter/order/page combination gets its own cache entry.
+func listCacheKey(req *v1.ListTodosRequest) string {
+	return "todo:list:" + req.String()
+}
+
 // ListTodos lists todo items.
 func (s *TodoService) ListTodos(ctx context.Context, req *v1.ListTodosRequest) (*v1.TodoSet, error) {
 	declarations, err := filtering.NewDeclarations(
@@ -88,7 +101,7 @@ func (s *TodoService) ListTodos(ctx context.Context, req *v1.ListTodosRequest) (
 	if req.PageSize <= 0 {
 		req.PageSize = defaultPageSize
 	}
-	todos, err := s.uc.ListTodos(ctx,
+	todos, err := s.listTodosWithCache(ctx, req,
 		biz.ListFilter(filter),
 		biz.ListOrderBy(orderBy),
 		biz.ListLimit(int(req.PageSize)),
