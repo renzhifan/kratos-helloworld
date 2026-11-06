@@ -3,7 +3,7 @@ server:
     addr: 0.0.0.0:8000
     timeout: 1s
   grpc:
-    addr: 0.0.0.0:9000
+    addr: 0.0.0.0:50051
     timeout: 1s
 data:
   redis:
@@ -25,7 +25,7 @@ logger:
 trace:
   # 关闭时不再上报链路数据，但仍在本地生成 trace_id/span_id，
   # 日志里会带上这两个字段。
-  enabled: true
+  enabled: false
   # OTLP/HTTP 上报地址，Jaeger 1.35+ 原生支持，端口 4318。
   endpoint: http://127.0.0.1:4318/v1/traces
 
