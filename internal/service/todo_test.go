@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	v1 "helloworld/api/todo/v1"
-	"helloworld/internal/biz"
+	v1 "logisticsServer/api/todo/v1"
+	"logisticsServer/internal/biz"
 
 	kratoserrors "github.com/go-kratos/kratos/v3/errors"
 	"github.com/google/uuid"

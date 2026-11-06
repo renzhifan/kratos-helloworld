@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	"helloworld/internal/conf"
+	"logisticsServer/internal/conf"
 
 	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
 	"github.com/go-kratos/kratos/v3"

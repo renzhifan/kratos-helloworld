@@ -5,8 +5,8 @@ import (
 	stdsql "database/sql"
 	"testing"
 
-	"helloworld/internal/biz"
-	"helloworld/internal/data/ent"
+	"logisticsServer/internal/biz"
+	"logisticsServer/internal/data/ent"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"

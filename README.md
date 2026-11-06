@@ -161,12 +161,12 @@ func NewGRPCServer(c *conf.Server, todo *service.TodoService, greeter *service.G
 ### 6. 重新生成依赖注入代码
 
 ```bash
-wire ./cmd/helloworld
+wire ./cmd/logisticsServer
 # 或者
 make generate
 ```
 
-会更新 `cmd/helloworld/wire_gen.go`。该文件由 Wire 自动生成，不要手改。
+会更新 `cmd/logisticsServer/wire_gen.go`。该文件由 Wire 自动生成，不要手改。
 
 ### 常见遗漏
 
@@ -177,7 +177,7 @@ make generate
 ## Run Locally
 
 ```bash
-go run ./cmd/server -conf ./configs
+go run ./cmd/logisticsServer -conf ./configs
 ```
 
 Default local ports are configured in `configs/config.yaml`:

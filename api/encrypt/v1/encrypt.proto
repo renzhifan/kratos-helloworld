@@ -6,7 +6,7 @@ package api.encrypt.v1;
 import "google/api/annotations.proto";
 import "validate/validate.proto";
 
-option go_package = "helloworld/api/encrypt/v1;v1";
+option go_package = "logisticsServer/api/encrypt/v1;v1";
 
 service Encrypt {
 	rpc CreateEncrypt (CreateEncryptRequest) returns (CreateEncryptReply){

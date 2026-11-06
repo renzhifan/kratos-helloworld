@@ -5,8 +5,8 @@ package ent
 import (
 	"context"
 	"fmt"
-	"helloworld/internal/data/ent/predicate"
-	"helloworld/internal/data/ent/todo"
+	"logisticsServer/internal/data/ent/predicate"
+	"logisticsServer/internal/data/ent/todo"
 	"math"
 
 	"entgo.io/ent"

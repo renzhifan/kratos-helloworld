@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	"helloworld/internal/biz"
+	"logisticsServer/internal/biz"
 )
 
 // Todo holds the schema definition for the Todo entity.

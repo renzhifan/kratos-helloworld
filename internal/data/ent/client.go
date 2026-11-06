@@ -9,9 +9,9 @@ import (
 	"log"
 	"reflect"
 
-	"helloworld/internal/data/ent/migrate"
+	"logisticsServer/internal/data/ent/migrate"
 
-	"helloworld/internal/data/ent/todo"
+	"logisticsServer/internal/data/ent/todo"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

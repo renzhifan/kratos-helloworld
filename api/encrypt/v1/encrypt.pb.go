@@ -416,7 +416,7 @@ const file_encrypt_v1_encrypt_proto_rawDesc = "" +
 	"GetEncrypt\x12!.api.encrypt.v1.GetEncryptRequest\x1a\x1f.api.encrypt.v1.GetEncryptReply\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/v1/encrypt/{encryptId}\x12}\n" +
 	"\x0fBatchGetEncrypt\x12&.api.encrypt.v1.BatchGetEncryptRequest\x1a$.api.encrypt.v1.BatchGetEncryptReply\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/encrypt/batch\x12P\n" +
 	"\x04Ping\x12\x1b.api.encrypt.v1.PingRequest\x1a\x19.api.encrypt.v1.PingReply\"\x10\x82\xd3\xe4\x93\x02\n" +
-	"\x12\b/v1/pingB\x1eZ\x1chelloworld/api/encrypt/v1;v1b\x06proto3"
+	"\x12\b/v1/pingB#Z!logisticsServer/api/encrypt/v1;v1b\x06proto3"
 
 var (
 	file_encrypt_v1_encrypt_proto_rawDescOnce sync.Once

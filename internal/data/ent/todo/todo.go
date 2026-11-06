@@ -3,7 +3,7 @@
 package todo
 
 import (
-	"helloworld/internal/biz"
+	"logisticsServer/internal/biz"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

@@ -3,9 +3,9 @@ package data
 import (
 	"context"
 
-	"helloworld/internal/biz"
-	"helloworld/internal/data/ent"
-	"helloworld/internal/data/ent/todo"
+	"logisticsServer/internal/biz"
+	"logisticsServer/internal/data/ent"
+	"logisticsServer/internal/data/ent/todo"
 
 	"github.com/go-kratos/aip-go/ents"
 	"github.com/google/uuid"

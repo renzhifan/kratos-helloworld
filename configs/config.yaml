@@ -11,8 +11,8 @@ data:
     source: root:cxrzrLDX9xWznd7S21MJ@tcp(rm-2ze04b35r7xdy915y4o.rwlb.rds.aliyuncs.com:3306)/data_encrypt?charset=utf8mb4&parseTime=True&loc=Local
     # Development conveniences. Keep both false in production and apply schema
     # changes as a separate reviewed step.
-    debug: true
-    auto_migrate: true
+    debug: false
+    auto_migrate: false
   redis:
     addr: ${REDIS_ADDR:127.0.0.1:6379}
     read_timeout: 0.2s

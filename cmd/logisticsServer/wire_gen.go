@@ -8,12 +8,12 @@ package main
 
 import (
 	"github.com/go-kratos/kratos/v3"
-	"helloworld/internal/biz"
-	"helloworld/internal/conf"
-	"helloworld/internal/data"
-	"helloworld/internal/server"
-	"helloworld/internal/service"
 	"log/slog"
+	"logisticsServer/internal/biz"
+	"logisticsServer/internal/conf"
+	"logisticsServer/internal/data"
+	"logisticsServer/internal/server"
+	"logisticsServer/internal/service"
 )
 
 import (

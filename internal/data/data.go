@@ -3,8 +3,8 @@ package data
 import (
 	"context"
 
-	"helloworld/internal/conf"
-	"helloworld/internal/data/ent"
+	"logisticsServer/internal/conf"
+	"logisticsServer/internal/data/ent"
 
 	"github.com/go-kratos/kratos/v3/log"
 	_ "github.com/go-sql-driver/mysql"

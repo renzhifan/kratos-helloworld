@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	pb "helloworld/api/encrypt/v1"
+	pb "logisticsServer/api/encrypt/v1"
 )
 
 type EncryptService struct {

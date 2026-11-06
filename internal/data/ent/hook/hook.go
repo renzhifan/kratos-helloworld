@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"helloworld/internal/data/ent"
+	"logisticsServer/internal/data/ent"
 )
 
 // The TodoFunc type is an adapter to allow the use of ordinary

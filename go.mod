@@ -1,4 +1,4 @@
-module helloworld
+module logisticsServer
 
 go 1.27.3
 

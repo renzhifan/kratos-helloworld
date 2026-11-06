@@ -6,8 +6,8 @@ import (
 	"io"
 	"strings"
 
-	v1 "helloworld/api/todo/v1"
-	"helloworld/internal/biz"
+	v1 "logisticsServer/api/todo/v1"
+	"logisticsServer/internal/biz"
 
 	"github.com/google/uuid"
 	"go.einride.tech/aip/fieldmask"

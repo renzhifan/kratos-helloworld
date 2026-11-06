@@ -4,8 +4,8 @@ package ent
 
 import (
 	"fmt"
-	"helloworld/internal/biz"
-	"helloworld/internal/data/ent/todo"
+	"logisticsServer/internal/biz"
+	"logisticsServer/internal/data/ent/todo"
 	"strings"
 	"time"
 
