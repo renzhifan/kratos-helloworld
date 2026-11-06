@@ -6,13 +6,6 @@ server:
     addr: 0.0.0.0:9000
     timeout: 1s
 data:
-  database:
-    driver: mysql
-    source: root:cxrzrLDX9xWznd7S21MJ@tcp(rm-2ze04b35r7xdy915y4o.rwlb.rds.aliyuncs.com:3306)/data_encrypt?charset=utf8mb4&parseTime=True&loc=Local
-    # Development conveniences. Keep both false in production and apply schema
-    # changes as a separate reviewed step.
-    debug: true
-    auto_migrate: false
   redis:
     addr: r-2zek17pth685l7qy81pd.redis.rds.aliyuncs.com:6379
     password: "cxrzrLDX9xWznd7S21MJ"
@@ -21,7 +14,7 @@ data:
     read_timeout: 0.2s
     write_timeout: 0.2s
 logger:
-  # 最低输出级别：info/warn/error。数据表 SQL 日志与请求日志都是 info 级别，
+  # 最低输出级别：info/warn/error。请求日志与 Redis 命令日志都是 info 级别，
   # 默认都写入 info 文件。
   level: info
   # 日志目录，按天按级别切分：info 文件只记录 info 日志，另有 warn/error

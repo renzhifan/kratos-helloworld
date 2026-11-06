@@ -4,7 +4,6 @@ import (
 	"log/slog"
 
 	sfv1 "logisticsServer/api/sf/v1"
-	v1 "logisticsServer/api/todo/v1"
 	"logisticsServer/internal/conf"
 	"logisticsServer/internal/service"
 
@@ -19,7 +18,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *service.TodoService, sf *service.SfService) *grpc.Server {
+func NewGRPCServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, sf *service.SfService) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -48,7 +47,6 @@ func NewGRPCServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *serv
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterTodoServiceServer(srv, todo)
 	sfv1.RegisterSfServer(srv, sf)
 	return srv
 }

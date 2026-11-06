@@ -28,23 +28,14 @@ func wireApp(confServer *conf.Server, confData *conf.Data, sf *conf.Sf, auth *co
 	if err != nil {
 		return nil, nil, err
 	}
-	dataData, cleanup2, err := data.NewData(confData, logger, client)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	todoRepo := data.NewTodoRepo(dataData)
-	todoCache := data.NewTodoCache(client)
-	todoUsecase := biz.NewTodoUsecase(todoRepo, todoCache)
-	todoService := service.NewTodoService(todoUsecase)
+	dataData := data.NewData(client)
 	sfRepo := data.NewSfRepo(dataData, logger, sf)
 	sfUsecase := biz.NewSfUsecase(sfRepo)
 	sfService := service.NewSfService(sfUsecase, logger)
-	grpcServer := server.NewGRPCServer(confServer, auth, logger, todoService, sfService)
+	grpcServer := server.NewGRPCServer(confServer, auth, logger, sfService)
 	httpServer := server.NewHTTPServer(confServer, auth, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
-		cleanup2()
 		cleanup()
 	}, nil
 }

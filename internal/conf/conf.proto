@@ -30,17 +30,8 @@ message Server {
 }
 
 message Data {
-  message Database {
-    // Driver name registered with database/sql, e.g. "mysql".
-    string driver = 1;
-    // Driver-specific DSN. Keep credentials out of version control.
-    string source = 2;
-    // Log every generated statement. Development only.
-    bool debug = 3;
-    // Create or update tables from the ent schema on startup. Leave false in
-    // production and apply migrations as a separate, reviewed step.
-    bool auto_migrate = 4;
-  }
+  // 已移除数据库节点（原 Database database = 1，ent/MySQL 相关配置）。
+  reserved 1;
   message Redis {
     string network = 1;
     string addr = 2;
@@ -53,13 +44,12 @@ message Data {
     // 建立连接的超时时间。
     google.protobuf.Duration dial_timeout = 7;
   }
-  Database database = 1;
   Redis redis = 2;
 }
 
 // Logger 日志输出配置。
 message Logger {
-  // 最低输出级别：info/warn/error。数据表 SQL 日志与请求日志均为 info 级别。
+  // 最低输出级别：info/warn/error。请求日志与 Redis 命令日志均为 info 级别。
   string level = 1;
   // 日志目录，为空时只输出到标准输出。
   string path = 2;

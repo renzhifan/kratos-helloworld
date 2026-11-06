@@ -7,7 +7,7 @@ import (
 )
 
 func TestTruncateKeepsShortValues(t *testing.T) {
-	const short = "get todo:list:page_size:2"
+	const short = "get sf:access_token"
 	if got := truncate(short, maxArgsLogLength); got != short {
 		t.Fatalf("truncate(%q) = %q, want unchanged", short, got)
 	}
