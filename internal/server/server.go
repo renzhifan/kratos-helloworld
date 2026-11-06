@@ -1,8 +1,8 @@
 package server
 
 import (
+	"logisticsServer/internal/auth"
 	"logisticsServer/internal/conf"
-	"logisticsServer/pkg/auth"
 
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/google/wire"
