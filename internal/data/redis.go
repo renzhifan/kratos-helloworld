@@ -8,6 +8,7 @@ import (
 
 	"logisticsServer/internal/conf"
 
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -47,6 +48,12 @@ func NewRedisClient(c *conf.Data, logger *slog.Logger) (*redis.Client, func(), e
 		return nil, nil, fmt.Errorf("ping redis: %w", err)
 	}
 	logger.Info("redis connected", "addr", opts.Addr, "db", opts.DB)
+	// 链路追踪 hook 先注册，后面的日志 hook 才能读到 redis span 的 span_id：
+	// 每条命令都会生成一个 client span，挂在当前请求 span 下上报。
+	if err := redisotel.InstrumentTracing(rdb); err != nil {
+		_ = rdb.Close()
+		return nil, nil, fmt.Errorf("instrument redis tracing: %w", err)
+	}
 	// Register after the startup ping so the health check does not add a
 	// context-free entry to the logs.
 	rdb.AddHook(newRedisLogger(logger))

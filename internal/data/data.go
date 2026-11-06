@@ -8,7 +8,6 @@ import (
 	"logisticsServer/internal/data/ent"
 
 	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v3/log"
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
@@ -27,7 +26,8 @@ type Data struct {
 // NewData opens the database client and returns it with a cleanup function.
 func NewData(c *conf.Data, logger *slog.Logger, rdb *redis.Client) (*Data, func(), error) {
 	dc := c.GetDatabase()
-	drv, err := entsql.Open(dc.GetDriver(), dc.GetSource())
+	// openDB 在驱动层挂了 OTel 包装，SQL 才会作为 client span 上报。
+	drv, err := openDB(dc.GetDriver(), dc.GetSource())
 	if err != nil {
 		return nil, nil, err
 	}
