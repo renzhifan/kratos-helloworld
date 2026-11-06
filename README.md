@@ -174,6 +174,22 @@ make generate
 - 第 5 步漏掉：编译能通过，但 gRPC/HTTP 服务列表里看不到新接口。
 - 没有 HTTP 注解：不会生成 `_http.pb.go`，`http.go` 里也无需注册。
 
+## 链路追踪（trace_id）
+
+服务端默认给每个请求生成 trace_id/span_id 并写进日志。如果调用方希望用自己的链路 ID
+串起上下游，请求里带上即可，服务端所有 span 与日志都会落在该 trace_id 下：
+
+| 通道 | 传递方式 |
+|------|----------|
+| gRPC | metadata `x-trace-id`（兼容 `trace_id` / `trace-id`） |
+| HTTP | header `X-Trace-Id`（键名不区分大小写） |
+
+- 支持 32 位十六进制、带连字符的 UUID（`0af76519-16cd-43dd-8448-eb211c80319c`）、16 位十六进制（左侧补零）。
+- 同时带 W3C `traceparent` 时以 `traceparent` 为准。
+- 值非法时记一条 WARN 并退回服务端自生成的 trace_id，不影响请求成功。
+- 服务端会把本次实际使用的 trace_id 回写到响应（gRPC header metadata / HTTP 响应头 `X-Trace-Id`），
+  客户端没带也能拿到，鉴权失败的响应同样带回，便于按响应里的 ID 去查服务端日志。
+
 ## Run Locally
 
 ```bash
