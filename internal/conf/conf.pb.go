@@ -28,6 +28,8 @@ type Bootstrap struct {
 	Data          *Data                  `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	Logger        *Logger                `protobuf:"bytes,3,opt,name=logger,proto3" json:"logger,omitempty"`
 	Trace         *Trace                 `protobuf:"bytes,4,opt,name=trace,proto3" json:"trace,omitempty"`
+	Sf            *Sf                    `protobuf:"bytes,5,opt,name=sf,proto3" json:"sf,omitempty"`
+	Auth          *Auth                  `protobuf:"bytes,6,opt,name=auth,proto3" json:"auth,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -86,6 +88,20 @@ func (x *Bootstrap) GetLogger() *Logger {
 func (x *Bootstrap) GetTrace() *Trace {
 	if x != nil {
 		return x.Trace
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetSf() *Sf {
+	if x != nil {
+		return x.Sf
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetAuth() *Auth {
+	if x != nil {
+		return x.Auth
 	}
 	return nil
 }
@@ -314,6 +330,144 @@ func (x *Trace) GetEndpoint() string {
 	return ""
 }
 
+// Auth 接口鉴权配置。调用方通过 HTTP header X-Api-Key 或 gRPC metadata
+// x-api-key 传入密钥，与 apiKey 做常量时间比对。
+type Auth struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 所有接口统一的调用方密钥，为空时一律拒绝访问，避免漏配导致接口裸奔。
+	ApiKey        string `protobuf:"bytes,1,opt,name=apiKey,proto3" json:"apiKey,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Auth) Reset() {
+	*x = Auth{}
+	mi := &file_conf_conf_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Auth) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Auth) ProtoMessage() {}
+
+func (x *Auth) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Auth.ProtoReflect.Descriptor instead.
+func (*Auth) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Auth) GetApiKey() string {
+	if x != nil {
+		return x.ApiKey
+	}
+	return ""
+}
+
+// Sf 顺丰开放平台配置，键名与顺丰开放平台文档保持一致。
+type Sf struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// 顾客编码，即合作伙伴编码 CustomerCode。
+	PartnerID string `protobuf:"bytes,1,opt,name=partnerID,proto3" json:"partnerID,omitempty"`
+	// 校验码，即合作伙伴密钥 checkWord，不下发给调用方。
+	Secret string `protobuf:"bytes,2,opt,name=secret,proto3" json:"secret,omitempty"`
+	// 网关地址，沙箱 https://sfapi-sbox.sf-express.com
+	// 正式 https://bspgw.sf-express.com。
+	Host string `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
+	// 月结卡号，月结/货到付款下单必填。
+	CustID string     `protobuf:"bytes,4,opt,name=custID,proto3" json:"custID,omitempty"`
+	Sender *Sf_Sender `protobuf:"bytes,5,opt,name=sender,proto3" json:"sender,omitempty"`
+	// 云打印面单模板编码，如 fm_150_standard_{partnerID}。
+	TemplateCode  string `protobuf:"bytes,6,opt,name=templateCode,proto3" json:"templateCode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Sf) Reset() {
+	*x = Sf{}
+	mi := &file_conf_conf_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Sf) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Sf) ProtoMessage() {}
+
+func (x *Sf) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Sf.ProtoReflect.Descriptor instead.
+func (*Sf) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Sf) GetPartnerID() string {
+	if x != nil {
+		return x.PartnerID
+	}
+	return ""
+}
+
+func (x *Sf) GetSecret() string {
+	if x != nil {
+		return x.Secret
+	}
+	return ""
+}
+
+func (x *Sf) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *Sf) GetCustID() string {
+	if x != nil {
+		return x.CustID
+	}
+	return ""
+}
+
+func (x *Sf) GetSender() *Sf_Sender {
+	if x != nil {
+		return x.Sender
+	}
+	return nil
+}
+
+func (x *Sf) GetTemplateCode() string {
+	if x != nil {
+		return x.TemplateCode
+	}
+	return ""
+}
+
 type Server_HTTP struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Network       string                 `protobuf:"bytes,1,opt,name=network,proto3" json:"network,omitempty"`
@@ -325,7 +479,7 @@ type Server_HTTP struct {
 
 func (x *Server_HTTP) Reset() {
 	*x = Server_HTTP{}
-	mi := &file_conf_conf_proto_msgTypes[5]
+	mi := &file_conf_conf_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -337,7 +491,7 @@ func (x *Server_HTTP) String() string {
 func (*Server_HTTP) ProtoMessage() {}
 
 func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[5]
+	mi := &file_conf_conf_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -385,7 +539,7 @@ type Server_GRPC struct {
 
 func (x *Server_GRPC) Reset() {
 	*x = Server_GRPC{}
-	mi := &file_conf_conf_proto_msgTypes[6]
+	mi := &file_conf_conf_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -397,7 +551,7 @@ func (x *Server_GRPC) String() string {
 func (*Server_GRPC) ProtoMessage() {}
 
 func (x *Server_GRPC) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[6]
+	mi := &file_conf_conf_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -451,7 +605,7 @@ type Data_Database struct {
 
 func (x *Data_Database) Reset() {
 	*x = Data_Database{}
-	mi := &file_conf_conf_proto_msgTypes[7]
+	mi := &file_conf_conf_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -463,7 +617,7 @@ func (x *Data_Database) String() string {
 func (*Data_Database) ProtoMessage() {}
 
 func (x *Data_Database) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[7]
+	mi := &file_conf_conf_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -525,7 +679,7 @@ type Data_Redis struct {
 
 func (x *Data_Redis) Reset() {
 	*x = Data_Redis{}
-	mi := &file_conf_conf_proto_msgTypes[8]
+	mi := &file_conf_conf_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -537,7 +691,7 @@ func (x *Data_Redis) String() string {
 func (*Data_Redis) ProtoMessage() {}
 
 func (x *Data_Redis) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[8]
+	mi := &file_conf_conf_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -602,17 +756,104 @@ func (x *Data_Redis) GetDialTimeout() *durationpb.Duration {
 	return nil
 }
 
+// Sender 默认寄件人信息，下单未传寄件人时作为寄件方联系人。
+type Sf_Sender struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`         // 寄件人姓名
+	Mobile        string                 `protobuf:"bytes,2,opt,name=mobile,proto3" json:"mobile,omitempty"`     // 寄件人手机号
+	Province      string                 `protobuf:"bytes,3,opt,name=province,proto3" json:"province,omitempty"` // 寄件人所在省份
+	City          string                 `protobuf:"bytes,4,opt,name=city,proto3" json:"city,omitempty"`         // 寄件人所在城市
+	County        string                 `protobuf:"bytes,5,opt,name=county,proto3" json:"county,omitempty"`     // 寄件人所在区/县
+	Address       string                 `protobuf:"bytes,6,opt,name=address,proto3" json:"address,omitempty"`   // 寄件人详细地址
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Sf_Sender) Reset() {
+	*x = Sf_Sender{}
+	mi := &file_conf_conf_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Sf_Sender) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Sf_Sender) ProtoMessage() {}
+
+func (x *Sf_Sender) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Sf_Sender.ProtoReflect.Descriptor instead.
+func (*Sf_Sender) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{6, 0}
+}
+
+func (x *Sf_Sender) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Sf_Sender) GetMobile() string {
+	if x != nil {
+		return x.Mobile
+	}
+	return ""
+}
+
+func (x *Sf_Sender) GetProvince() string {
+	if x != nil {
+		return x.Province
+	}
+	return ""
+}
+
+func (x *Sf_Sender) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+func (x *Sf_Sender) GetCounty() string {
+	if x != nil {
+		return x.County
+	}
+	return ""
+}
+
+func (x *Sf_Sender) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
 var File_conf_conf_proto protoreflect.FileDescriptor
 
 const file_conf_conf_proto_rawDesc = "" +
 	"\n" +
 	"\x0fconf/conf.proto\x12\n" +
-	"kratos.api\x1a\x1egoogle/protobuf/duration.proto\"\xb2\x01\n" +
+	"kratos.api\x1a\x1egoogle/protobuf/duration.proto\"\xf8\x01\n" +
 	"\tBootstrap\x12*\n" +
 	"\x06server\x18\x01 \x01(\v2\x12.kratos.api.ServerR\x06server\x12$\n" +
 	"\x04data\x18\x02 \x01(\v2\x10.kratos.api.DataR\x04data\x12*\n" +
 	"\x06logger\x18\x03 \x01(\v2\x12.kratos.api.LoggerR\x06logger\x12'\n" +
-	"\x05trace\x18\x04 \x01(\v2\x11.kratos.api.TraceR\x05trace\"\xb8\x02\n" +
+	"\x05trace\x18\x04 \x01(\v2\x11.kratos.api.TraceR\x05trace\x12\x1e\n" +
+	"\x02sf\x18\x05 \x01(\v2\x0e.kratos.api.SfR\x02sf\x12$\n" +
+	"\x04auth\x18\x06 \x01(\v2\x10.kratos.api.AuthR\x04auth\"\xb8\x02\n" +
 	"\x06Server\x12+\n" +
 	"\x04http\x18\x01 \x01(\v2\x17.kratos.api.Server.HTTPR\x04http\x12+\n" +
 	"\x04grpc\x18\x02 \x01(\v2\x17.kratos.api.Server.GRPCR\x04grpc\x1ai\n" +
@@ -646,7 +887,23 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\amax_age\x18\x03 \x01(\x05R\x06maxAge\"=\n" +
 	"\x05Trace\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x1a\n" +
-	"\bendpoint\x18\x02 \x01(\tR\bendpointB$Z\"logisticsServer/internal/conf;confb\x06proto3"
+	"\bendpoint\x18\x02 \x01(\tR\bendpoint\"\x1e\n" +
+	"\x04Auth\x12\x16\n" +
+	"\x06apiKey\x18\x01 \x01(\tR\x06apiKey\"\xd2\x02\n" +
+	"\x02Sf\x12\x1c\n" +
+	"\tpartnerID\x18\x01 \x01(\tR\tpartnerID\x12\x16\n" +
+	"\x06secret\x18\x02 \x01(\tR\x06secret\x12\x12\n" +
+	"\x04host\x18\x03 \x01(\tR\x04host\x12\x16\n" +
+	"\x06custID\x18\x04 \x01(\tR\x06custID\x12-\n" +
+	"\x06sender\x18\x05 \x01(\v2\x15.kratos.api.Sf.SenderR\x06sender\x12\"\n" +
+	"\ftemplateCode\x18\x06 \x01(\tR\ftemplateCode\x1a\x96\x01\n" +
+	"\x06Sender\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06mobile\x18\x02 \x01(\tR\x06mobile\x12\x1a\n" +
+	"\bprovince\x18\x03 \x01(\tR\bprovince\x12\x12\n" +
+	"\x04city\x18\x04 \x01(\tR\x04city\x12\x16\n" +
+	"\x06county\x18\x05 \x01(\tR\x06county\x12\x18\n" +
+	"\aaddress\x18\x06 \x01(\tR\aaddressB$Z\"logisticsServer/internal/conf;confb\x06proto3"
 
 var (
 	file_conf_conf_proto_rawDescOnce sync.Once
@@ -660,38 +917,44 @@ func file_conf_conf_proto_rawDescGZIP() []byte {
 	return file_conf_conf_proto_rawDescData
 }
 
-var file_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),           // 0: kratos.api.Bootstrap
 	(*Server)(nil),              // 1: kratos.api.Server
 	(*Data)(nil),                // 2: kratos.api.Data
 	(*Logger)(nil),              // 3: kratos.api.Logger
 	(*Trace)(nil),               // 4: kratos.api.Trace
-	(*Server_HTTP)(nil),         // 5: kratos.api.Server.HTTP
-	(*Server_GRPC)(nil),         // 6: kratos.api.Server.GRPC
-	(*Data_Database)(nil),       // 7: kratos.api.Data.Database
-	(*Data_Redis)(nil),          // 8: kratos.api.Data.Redis
-	(*durationpb.Duration)(nil), // 9: google.protobuf.Duration
+	(*Auth)(nil),                // 5: kratos.api.Auth
+	(*Sf)(nil),                  // 6: kratos.api.Sf
+	(*Server_HTTP)(nil),         // 7: kratos.api.Server.HTTP
+	(*Server_GRPC)(nil),         // 8: kratos.api.Server.GRPC
+	(*Data_Database)(nil),       // 9: kratos.api.Data.Database
+	(*Data_Redis)(nil),          // 10: kratos.api.Data.Redis
+	(*Sf_Sender)(nil),           // 11: kratos.api.Sf.Sender
+	(*durationpb.Duration)(nil), // 12: google.protobuf.Duration
 }
 var file_conf_conf_proto_depIdxs = []int32{
 	1,  // 0: kratos.api.Bootstrap.server:type_name -> kratos.api.Server
 	2,  // 1: kratos.api.Bootstrap.data:type_name -> kratos.api.Data
 	3,  // 2: kratos.api.Bootstrap.logger:type_name -> kratos.api.Logger
 	4,  // 3: kratos.api.Bootstrap.trace:type_name -> kratos.api.Trace
-	5,  // 4: kratos.api.Server.http:type_name -> kratos.api.Server.HTTP
-	6,  // 5: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
-	7,  // 6: kratos.api.Data.database:type_name -> kratos.api.Data.Database
-	8,  // 7: kratos.api.Data.redis:type_name -> kratos.api.Data.Redis
-	9,  // 8: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	9,  // 9: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	9,  // 10: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
-	9,  // 11: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
-	9,  // 12: kratos.api.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
-	13, // [13:13] is the sub-list for method output_type
-	13, // [13:13] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	6,  // 4: kratos.api.Bootstrap.sf:type_name -> kratos.api.Sf
+	5,  // 5: kratos.api.Bootstrap.auth:type_name -> kratos.api.Auth
+	7,  // 6: kratos.api.Server.http:type_name -> kratos.api.Server.HTTP
+	8,  // 7: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
+	9,  // 8: kratos.api.Data.database:type_name -> kratos.api.Data.Database
+	10, // 9: kratos.api.Data.redis:type_name -> kratos.api.Data.Redis
+	11, // 10: kratos.api.Sf.sender:type_name -> kratos.api.Sf.Sender
+	12, // 11: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	12, // 12: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	12, // 13: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
+	12, // 14: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
+	12, // 15: kratos.api.Data.Redis.dial_timeout:type_name -> google.protobuf.Duration
+	16, // [16:16] is the sub-list for method output_type
+	16, // [16:16] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_conf_conf_proto_init() }
@@ -705,7 +968,7 @@ func file_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_conf_conf_proto_rawDesc), len(file_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -10,6 +10,8 @@ message Bootstrap {
   Data data = 2;
   Logger logger = 3;
   Trace trace = 4;
+  Sf sf = 5;
+  Auth auth = 6;
 }
 
 message Server {
@@ -72,4 +74,36 @@ message Trace {
   bool enabled = 1;
   // OTLP/HTTP 上报地址，如 http://127.0.0.1:4318/v1/traces。
   string endpoint = 2;
+}
+
+// Auth 接口鉴权配置。调用方通过 HTTP header X-Api-Key 或 gRPC metadata
+// x-api-key 传入密钥，与 apiKey 做常量时间比对。
+message Auth {
+  // 所有接口统一的调用方密钥，为空时一律拒绝访问，避免漏配导致接口裸奔。
+  string apiKey = 1;
+}
+
+// Sf 顺丰开放平台配置，键名与顺丰开放平台文档保持一致。
+message Sf {
+  // Sender 默认寄件人信息，下单未传寄件人时作为寄件方联系人。
+  message Sender {
+    string name = 1; // 寄件人姓名
+    string mobile = 2; // 寄件人手机号
+    string province = 3; // 寄件人所在省份
+    string city = 4; // 寄件人所在城市
+    string county = 5; // 寄件人所在区/县
+    string address = 6; // 寄件人详细地址
+  }
+  // 顾客编码，即合作伙伴编码 CustomerCode。
+  string partnerID = 1;
+  // 校验码，即合作伙伴密钥 checkWord，不下发给调用方。
+  string secret = 2;
+  // 网关地址，沙箱 https://sfapi-sbox.sf-express.com
+  // 正式 https://bspgw.sf-express.com。
+  string host = 3;
+  // 月结卡号，月结/货到付款下单必填。
+  string custID = 4;
+  Sender sender = 5;
+  // 云打印面单模板编码，如 fm_150_standard_{partnerID}。
+  string templateCode = 6;
 }

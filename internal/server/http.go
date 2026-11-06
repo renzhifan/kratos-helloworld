@@ -3,7 +3,7 @@ package server
 import (
 	"log/slog"
 
-	encryptv1 "logisticsServer/api/encrypt/v1"
+	sfv1 "logisticsServer/api/sf/v1"
 	v1 "logisticsServer/api/todo/v1"
 	"logisticsServer/internal/conf"
 	"logisticsServer/internal/service"
@@ -19,13 +19,15 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, logger *slog.Logger, todo *service.TodoService, encrypt *service.EncryptService) *http.Server {
+func NewHTTPServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *service.TodoService, sf *service.SfService) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
 			// tracing 必须在 logging 之前，请求日志才能读到 span 的 trace_id/span_id。
 			tracing.Server(),
 			logging.Server(logger),
+			// 鉴权放在 logging 之后，鉴权失败也会记录访问日志。
+			authMiddleware(a),
 			validate.Validator(func(req any) error {
 				if msg, ok := req.(proto.Message); ok {
 					if err := fieldbehavior.ValidateRequiredFields(msg); err != nil {
@@ -47,6 +49,6 @@ func NewHTTPServer(c *conf.Server, logger *slog.Logger, todo *service.TodoServic
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterTodoServiceHTTPServer(srv, todo)
-	encryptv1.RegisterEncryptHTTPServer(srv, encrypt)
+	sfv1.RegisterSfHTTPServer(srv, sf)
 	return srv
 }

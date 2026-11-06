@@ -1,0 +1,414 @@
+syntax = "proto3";
+
+package api.sf.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+option go_package = "logisticsServer/api/sf/v1;v1";
+
+// Sf 顺丰开放平台能力
+service Sf {
+  // GetAccessToken 获取顺丰访问令牌，服务端统一缓存，过期前自动刷新
+  rpc GetAccessToken (GetAccessTokenRequest) returns (GetAccessTokenReply) {
+    option (google.api.http) = {
+      get: "/v1/sf/accessToken"
+    };
+  };
+
+  // GetConfig 获取顺丰调用配置，包含访问令牌、顾客编码、月结卡号与云打印面单模板编码
+  rpc GetConfig (GetConfigRequest) returns (GetConfigReply) {
+    option (google.api.http) = {
+      get: "/v1/sf/config"
+    };
+  };
+
+  // ExpReceSearchOrderResp 订单结果查询（EXP_RECE_SEARCH_ORDER_RESP），
+  // 用于未收到下单返回数据时，查询客户订单当前的处理状态
+  rpc ExpReceSearchOrderResp (ExpReceSearchOrderRespRequest) returns (ExpReceSearchOrderRespReply) {
+    option (google.api.http) = {
+      post: "/v1/sf/order/search"
+      body: "*"
+    };
+  };
+
+  // ExpReceQueryDeliverTm 时效标准及价格查询（EXP_RECE_QUERY_DELIVERTM），
+  // 根据寄收地址、重量与业务类型查询预计送达时间与运费
+  rpc ExpReceQueryDeliverTm (ExpReceQueryDeliverTmRequest) returns (ExpReceQueryDeliverTmReply) {
+    option (google.api.http) = {
+      post: "/v1/sf/deliverTm"
+      body: "*"
+    };
+  };
+
+  // ExpReceCreateOrder 下单（EXP_RECE_CREATE_ORDER），支持月结卡号与代收货款等增值服务
+  rpc ExpReceCreateOrder (ExpReceCreateOrderRequest) returns (ExpReceCreateOrderReply) {
+    option (google.api.http) = {
+      post: "/v1/sf/order/create"
+      body: "*"
+    };
+  };
+
+  // ExpReceUpdateOrder 订单确认/取消（EXP_RECE_UPDATE_ORDER），dealType 1确认 2取消
+  rpc ExpReceUpdateOrder (ExpReceUpdateOrderRequest) returns (ExpReceUpdateOrderReply) {
+    option (google.api.http) = {
+      post: "/v1/sf/order/update"
+      body: "*"
+    };
+  };
+
+  // ExpReceWantedIntercept 截单转寄退回（EXP_RECE_WANTED_INTERCEPT），
+  // 对在途运单下发转寄、退回、改派等拦截指令，派件出仓前有效
+  rpc ExpReceWantedIntercept (ExpReceWantedInterceptRequest) returns (ExpReceWantedInterceptReply) {
+    option (google.api.http) = {
+      post: "/v1/sf/wantedIntercept"
+      body: "*"
+    };
+  };
+
+  // ExpReceFilterOrderBsp 订单筛选（EXP_RECE_FILTER_ORDER_BSP），
+  // 系统根据地址库判断订单是否可收派，支持一次筛选多个订单
+  rpc ExpReceFilterOrderBsp (ExpReceFilterOrderBspRequest) returns (ExpReceFilterOrderBspReply) {
+    option (google.api.http) = {
+      post: "/v1/sf/order/filter"
+      body: "*"
+    };
+  };
+}
+
+message GetAccessTokenRequest {
+}
+
+message GetAccessTokenReply {
+  string accessToken = 1; // 访问令牌
+  int32 expiresIn = 2; // 令牌剩余有效期，单位秒
+}
+
+message GetConfigRequest {
+}
+
+// GetConfigReply 顺丰调用配置，不含校验码等密钥信息
+message GetConfigReply {
+  string accessToken = 1; // 访问令牌
+  int32 expiresIn = 2; // 令牌剩余有效期，单位秒
+  string partnerID = 3; // 顾客编码（合作伙伴编码 CustomerCode）
+  string monthlyCard = 4; // 月结卡号，取配置 sf.custID
+  string templateCode = 5; // 云打印面单模板编码，取配置 sf.templateCode
+}
+
+// ExpReceSearchOrderRespRequest 订单结果查询请求
+message ExpReceSearchOrderRespRequest {
+  string orderId = 1; // 客户订单号，必填
+  string searchType = 2; // 查询类型：1正向单 2退货单，非必传
+  string language = 3; // 响应报文语言：zh-CN简体/zh-TW、zh-HK、zh-MO繁体/en英文，不传缺省 zh-CN
+  string mainWaybillNo = 4; // 顺丰下单接口返回的15或12位运单号、母单号，非必传
+}
+
+// ExpReceSearchOrderRespReply 订单结果查询响应
+message ExpReceSearchOrderRespReply {
+  string orderId = 1; // 客户订单号
+  string mainWaybillNo = 2; // 顺丰运单号（母单号）
+  repeated WaybillNoInfo waybillNoInfoList = 3; // 运单号信息列表
+  int32 resStatus = 4; // 订单状态：0下单失败 1已取消 2已接单 3处理中 4派件中 5已签收 50全部
+  string originCode = 5 [json_name = "origincode"]; // 原寄地代码
+  string destCode = 6 [json_name = "destcode"]; // 目的地代码
+  string filterResult = 7; // 筛单结果：0人工确认 1确认 2不确定
+  google.protobuf.Value remark = 8; // 备注，透传顺丰原始报文
+  repeated RouteLabelInfo routeLabelInfo = 9; // 路由标签信息（面单数据）
+  google.protobuf.Value contactInfo = 10; // 联系方式信息，透传顺丰原始报文
+  string clientCode = 11; // 客户端编码
+  google.protobuf.Value serviceList = 12; // 服务列表，透传顺丰原始报文
+  google.protobuf.Value returnExtraInfoList = 13; // 返回扩展信息列表，透传顺丰原始报文
+  string deliverConsigneeRemark = 14; // 派送备注
+  string isDelete = 15; // 订单是否删除
+  string backWaybillNo = 16; // 退货单运单号
+  int32 totalQty = 17; // 总件数
+  string success = 18; // 顺丰是否处理成功："true"/"false"，为 false 时见 errorCode/errorMsg
+  string errorCode = 19; // 顺丰响应码，S0000 表示成功
+  string errorMsg = 20; // 顺丰错误描述
+}
+
+// WaybillNoInfo 运单号信息
+message WaybillNoInfo {
+  int32 waybillType = 1; // 运单号类型：1母单 2子单 3退回件
+  string waybillNo = 2; // 运单号
+  string boxNo = 3; // 箱号，下单返回
+  double length = 4; // 长，单位cm，下单返回
+  double width = 5; // 宽，单位cm，下单返回
+  double height = 6; // 高，单位cm，下单返回
+  double weight = 7; // 重量，单位kg，下单返回
+  double volume = 8; // 体积，单位cm³，下单返回
+}
+
+// RouteLabelInfo 路由标签信息
+message RouteLabelInfo {
+  string code = 1; // 返回码，1000表示成功
+  RouteLabelData routeLabelData = 2; // 路由标签数据（面单数据）
+  string message = 3; // 返回信息
+}
+
+// RouteLabelData 路由标签数据
+message RouteLabelData {
+  string waybillNo = 1; // 运单号
+  string sourceTransferCode = 2; // 原寄地中转场代码
+  string sourceCityCode = 3; // 原寄地城市代码
+  string sourceDeptCode = 4; // 原寄地网点代码
+  string sourceTeamCode = 5; // 原寄地分部代码
+  string destCityCode = 6; // 目的地城市代码
+  string destDeptCode = 7; // 目的地网点代码
+  string destDeptCodeMapping = 8; // 目的地网点代码映射
+  string destTeamCode = 9; // 目的地分部代码
+  string destTeamCodeMapping = 10; // 目的地分部代码映射
+  string destTransferCode = 11; // 目的地中转场代码
+  string destRouteLabel = 12; // 目的地路由标签
+  string proName = 13; // 产品名称
+  string proCode = 14; // 产品编码
+  string cargoTypeCode = 15; // 货物类型编码
+  string limitTypeCode = 16; // 限制类型编码
+  string expressTypeCode = 17; // 快递类型编码
+  string codingMapping = 18; // 编码映射
+  string codingMappingOut = 19; // 外部编码映射
+  string xbFlag = 20; // XB标识
+  string printFlag = 21; // 打印标识
+  string printIcon = 22; // 打印图标
+  string twoDimensionCode = 23; // 二维码内容
+  string abFlag = 24; // AB标识
+  string destPortCode = 25; // 目的地港口代码
+  string destCountry = 26; // 目的地国家
+  string destPostCode = 27; // 目的地邮编
+  string goodsValueTotal = 28; // 货物总价值
+  string currencySymbol = 29; // 货币符号
+  string cusBatch = 30; // 客户批次
+  string goodsNumber = 31; // 货物数量
+  string errMsg = 32; // 错误信息
+  string checkCode = 33; // 校验码
+  string proIcon = 34; // 产品图标
+  string fileIcon = 35; // 文件图标
+  string fbaIcon = 36; // FBA图标
+  string icsmIcon = 37; // ICSM图标
+  string destGisDeptCode = 38; // 目的地GIS网点代码
+  google.protobuf.Value newIcon = 39; // 新图标，透传顺丰原始报文
+  string destAddrKeyWord = 40; // 目的地地址关键字
+  string sendAreaCode = 41; // 寄件区域代码
+  string destinationStationCode = 42; // 目的站点代码
+  string sxLabelDestCode = 43; // 时效标签目的地代码
+  string sxDestTransferCode = 44; // 时效标签目的地中转场代码
+  string sxCompany = 45; // 时效标签公司
+  string newAbFlag = 46; // 新AB标识
+  google.protobuf.Value rongType = 47; // 融通类型，透传顺丰原始报文
+  google.protobuf.Value waybillIconList = 48; // 运单图标列表，透传顺丰原始报文
+}
+
+// ExpReceQueryDeliverTmRequest 时效标准及价格查询请求
+message ExpReceQueryDeliverTmRequest {
+  string businessType = 1; // 时效代码：1特快时效 2标快时效 5顺丰次晨 6即日；不传则返回默认时效对应的产品列表
+  string consignedTime = 2; // 寄件时间，格式 yyyy-MM-dd HH:mm:ss，缺省当前时间
+  Address srcAddress = 3; // 原寄地信息，必传
+  Address destAddress = 4; // 目的地信息，必传
+  string searchPrice = 5; // 是否查询价格：1查询 0不查询，只能为0/1或不传
+  optional double weight = 6; // 货物总重量（含子母件），单位kg，非必传；传入时必须大于 0
+  double volume = 7; // 货物体积，长、宽、高分别以厘米为单位计算，精确到小数点后2位
+  string monthlyCard = 8; // 月结卡号，传则查询该卡号的个性化预估价格，为空时取配置 sf.custID
+}
+
+// ExpReceQueryDeliverTmReply 时效标准及价格查询响应
+message ExpReceQueryDeliverTmReply {
+  repeated DeliverTmDto deliverTmDto = 1; // 时效与价格信息列表
+  string success = 2; // 顺丰是否处理成功："true"/"false"，为 false 时见 errorCode/errorMsg
+  string errorCode = 3; // 顺丰响应码，S0000 表示成功
+  string errorMsg = 4; // 顺丰错误描述
+}
+
+// Address 寄收地址信息，code 与省市区分组二选一填写
+message Address {
+  string province = 1; // 省份，必须是标准省名称，如 广东省；直辖市直传 北京
+  string city = 2; // 城市，必须是标准城市名称，如 深圳市
+  string district = 3; // 区/县，必须是标准区县名称，如 福田区
+  string address = 4; // 详细地址，需包含省市信息以提高识别成功率
+  string code = 5; // 地区域代码，如 020、755；填写本项后会忽略省市县具体地址
+}
+
+// DeliverTmDto 时效与价格信息
+message DeliverTmDto {
+  string businessType = 1; // 快件产品（时效代码）
+  string businessTypeDesc = 2; // 快件产品描述
+  string deliverTime = 3; // 承诺时间
+  string searchPrice = 4; // 是否查询价格：1返回价格 0不返回价格
+  double fee = 5; // 价格，单位元，null代表无流向排布/未要求返回价格
+  string closeTime = 6; // 截单时间
+}
+
+// ExpReceCreateOrderRequest 下单请求
+message ExpReceCreateOrderRequest {
+  string orderId = 1; // 客户订单号，同一订单号只能下单一次
+  string monthlyCard = 2; // 月结卡号，为空时取配置 sf.custID
+  string language = 3; // 语言，缺省 zh_CN
+  repeated ContactInfo contactInfoList = 4; // 收寄双方信息，contactType 1寄件 2收件；无寄件人时取配置 sf.sender
+  repeated CargoDetail cargoDetails = 5; // 货物信息
+  repeated ServiceItem serviceList = 6; // 增值服务，如 XCOD 代收货款
+}
+
+// ExpReceCreateOrderReply 下单响应
+message ExpReceCreateOrderReply {
+  string orderId = 1; // 客户订单号
+  string originCode = 2; // 原寄地代码
+  string destCode = 3; // 目的地代码
+  int32 filterResult = 4; // 筛单结果：1确认 2人工确认 3不确定
+  string remark = 5; // 备注
+  string url = 6; // 面单打印地址
+  string paymentLink = 7; // 支付链接
+  bool isUpstairs = 8; // 是否上楼
+  bool isSpecialWarehouseService = 9; // 是否特殊仓服务
+  string mappingMark = 10; // 映射标记
+  string agentMailno = 11; // 代理运单号
+  google.protobuf.Value returnExtraInfoList = 12; // 返回扩展信息列表，透传顺丰原始报文
+  repeated WaybillNoInfo waybillNoInfoList = 13; // 运单号信息列表
+  repeated RouteLabelInfo routeLabelInfo = 14; // 路由标签信息（面单数据）
+  google.protobuf.Value contactInfoList = 15; // 顺丰返回的收寄双方信息，透传顺丰原始报文
+  string sendStartTm = 16; // 发货时间
+  google.protobuf.Value customerRights = 17; // 客户权益，透传顺丰原始报文
+  google.protobuf.Value expressTypeId = 18; // 产品类型ID，透传顺丰原始报文
+  string success = 19; // 顺丰是否处理成功："true"/"false"，为 false 时见 errorCode/errorMsg
+  string errorCode = 20; // 顺丰响应码，S0000 表示成功
+  string errorMsg = 21; // 顺丰错误描述
+}
+
+// ContactInfo 收寄双方信息
+message ContactInfo {
+  int32 contactType = 1; // 联系人类型：1寄件人 2收件人
+  string contact = 2; // 联系人姓名
+  string company = 3; // 公司名称
+  string tel = 4; // 联系电话
+  string country = 5; // 国家代码，如 CN
+  string postCode = 6; // 邮编
+  string address = 7; // 详细地址
+}
+
+// CargoDetail 货物信息
+message CargoDetail {
+  string name = 1; // 货物名称
+  double count = 2; // 货物数量
+  string unit = 3; // 货物单位，如 个
+  double weight = 4; // 货物重量，单位kg
+  double amount = 5; // 货物金额
+  string currency = 6; // 币种，如 CNY、HKD
+  string sourceArea = 7; // 原产地，如 CHN
+}
+
+// ServiceItem 增值服务
+message ServiceItem {
+  string name = 1; // 增值服务名称，如 XCOD 代收货款
+  string value = 2; // 增值服务值
+  string value1 = 3; // 附加属性1，如代收货款卡号
+  string value2 = 4; // 附加属性2
+}
+
+// ExpReceUpdateOrderRequest 订单确认/取消请求
+message ExpReceUpdateOrderRequest {
+  string orderId = 1; // 客户订单号
+  int32 dealType = 2; // 处理类型：1确认 2取消
+  string language = 3; // 语言，缺省 zh-CN
+  double totalWeight = 4; // 订单总重量，单位kg，确认时必填
+  repeated WaybillNoInfo waybillNoInfoList = 5; // 顺丰运单号信息，取消时可为空
+}
+
+// ExpReceUpdateOrderReply 订单确认/取消响应
+message ExpReceUpdateOrderReply {
+  string orderId = 1; // 客户订单号
+  repeated WaybillNoInfo waybillNoInfoList = 2; // 顺丰运单号信息
+  int32 resStatus = 3; // 结果状态：1客户订单号与顺丰运单号不匹配 2操作成功
+  google.protobuf.Value extraInfoList = 4; // 扩展属性，透传顺丰原始报文
+  string success = 5; // 顺丰是否处理成功："true"/"false"，为 false 时见 errorCode/errorMsg
+  string errorCode = 6; // 顺丰响应码，S0000 表示成功（如取消时 8037 表示已消单）
+  string errorMsg = 7; // 顺丰错误描述
+}
+
+// ExpReceWantedInterceptRequest 截单转寄退回请求，按 serviceCode 选择转寄、退回、改派等指令
+message ExpReceWantedInterceptRequest {
+  string waybillNo = 1; // 运单号，必填
+  string serviceCode = 2; // 指令类型，必填：1转寄 2退回 3优派 4再派 6改派上门 7更改派送时间 8修改收件人 9更改付款方式 10修改代收货款 12作废 38部分退回
+  string role = 3; // 发起方，必填：1寄方 2收方
+  string payMode = 4; // 付款方式，必填：1寄付现结 2到付现结 3寄付转第三方月结 4寄付月结
+  string monthlyCardNo = 5; // 月结卡号，原单月结、本次付款方式为月结或修改代收货款时必填，为空时取配置 sf.custID
+  string productType = 6; // 产品类型
+  optional double codAmount = 7; // 代收货款金额，修改代收货款时传入，传 0 表示取消代收
+  string deliverDate = 8; // 派送日期，格式 yyyy-MM-dd，更改派送时间时传入
+  string deliverTimeMin = 9; // 派送最早时间，格式 HH:mm，更改派送时间时传入
+  string deliverTimeMax = 10; // 派送最晚时间，格式 HH:mm，更改派送时间时传入
+  string selfPickPoint = 11; // 自取点：1合作点 2快递柜 3网点 4中转场
+  NewDestAddress newDestAddress = 12; // 新目的地信息，转寄/退回与修改收件人时必填，取消指令时不传
+  bool cancel = 13; // true 取消已下发的转寄/退回指令，false 下发指令，缺省 false
+  string cusId = 14; // 指令编码，cancel 为 true 时必填，取指令下发成功返回的 cusId
+}
+
+// NewDestAddress 新目的地信息，转寄/退回必须携带地址、联系人姓名与电话
+message NewDestAddress {
+  string country = 1; // 国家，缺省中国
+  string countryCode = 2; // 国家编码，缺省 CN
+  string province = 3; // 省，如 广东省
+  string city = 4; // 市，如 深圳市
+  string county = 5; // 区，如 南山区
+  string address = 6; // 详细地址，不含省市区，如 粤海街道高新区1C栋二楼
+  string company = 7; // 公司名称
+  string contact = 8; // 联系人姓名
+  string phone = 9; // 联系电话
+  string areaCode = 10; // 网点代码，如 755WQ
+  string locationCode = 11; // 城市代码
+}
+
+// ExpReceWantedInterceptReply 截单转寄退回响应
+message ExpReceWantedInterceptReply {
+  string cusId = 1; // 指令编码，取消指令时回传
+  string amount = 2; // 费用参数
+  FreightAdditionInfoResp freightAdditionInfoResp = 3; // 费用附加信息
+  string success = 4; // 顺丰是否处理成功："true"/"false"，为 false 时见 errorCode/errorMsg
+  string errorCode = 5; // 顺丰响应码，S0000 表示成功
+  string errorMsg = 6; // 顺丰错误描述
+}
+
+// FreightAdditionInfoResp 费用附加信息
+message FreightAdditionInfoResp {
+  string interceptionDeptCode = 1; // 预估拦截地
+  string transferFlg = 2; // 拦截地是否为中转场：1中转场，其余值非中转场
+}
+
+// ExpReceFilterOrderBspRequest 订单筛选请求，顺丰要求 msgData 为数组，至少一条
+message ExpReceFilterOrderBspRequest {
+  repeated OrderFilter orderFilterList = 1; // 待筛选订单列表
+}
+
+// OrderFilter 订单筛选条件
+message OrderFilter {
+  int32 filterType = 1; // 筛单类别，必填：1自动筛单 2可人工筛单，不传缺省 1
+  string orderId = 2; // 客户订单号，非必填
+  string monthlyCard = 3; // 月结卡号，非必填，为空时默认取配置 sf.custID
+  repeated FilterAddrInfoDto contactInfos = 4; // 地址信息，非必填
+}
+
+// FilterAddrInfoDto 筛选地址信息
+message FilterAddrInfoDto {
+  int32 contactType = 1; // 地址类型：1寄件方 2到件方
+  string tel = 2; // 联系电话
+  string country = 3; // 国家或地区代码，如 CN（中国）886（台湾），跨境件必传
+  string province = 4; // 省级行政区名称
+  string city = 5; // 地级行政区名称
+  string county = 6; // 县/区级行政区名称
+  string address = 7; // 详细地址
+  string postCode = 8; // 邮编，跨境件必填
+}
+
+// ExpReceFilterOrderBspReply 订单筛选响应
+message ExpReceFilterOrderBspReply {
+  repeated FilterOrderResult resDtos = 1; // 筛选结果列表，顺序与请求一致
+  string success = 2; // 顺丰是否处理成功："true"/"false"，为 false 时见 errorCode/errorMsg
+  string errorCode = 3; // 顺丰响应码，S0000 表示成功
+  string errorMsg = 4; // 顺丰错误描述
+}
+
+// FilterOrderResult 单个订单的筛选结果
+message FilterOrderResult {
+  string orderId = 1; // 客户订单号
+  int32 filterResult = 2; // 筛选结果：1人工确认 2可收派 3不可以收派 4地址无法确认；filterType 为 1 时不会返回 1
+  string originCode = 3; // 原寄地区域代码，可收派时不为空
+  string destCode = 4; // 目的地区域代码，可收派时不为空
+  string remark = 5; // 不可以收派的原因代码：1收方超范围 2派方超范围 3其它原因，filterResult 为 3 时必填
+}

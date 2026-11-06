@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package sf.v1;
+
+option go_package = "logisticsServer/api/sf/v1;v1";
+option java_multiple_files = true;
+option java_package = "sf.v1";
+option objc_class_prefix = "APISfV1";
+
+enum ErrorReason {
+  SF_CONFIG_INVALID = 0;
+  SF_TOKEN_REQUEST_FAILED = 1;
+  SF_AUTH_FAILED = 2;
+  SF_TOKEN_EMPTY = 3;
+  SF_CACHE_FAILED = 4;
+  SF_STD_SERVICE_FAILED = 5; // 顺丰统一入口调用失败
+  SF_ORDER_SEARCH_PARAM_INVALID = 6; // 订单结果查询参数缺失
+  SF_DELIVER_TM_PARAM_INVALID = 7; // 时效标准及价格查询参数缺失
+  SF_CREATE_ORDER_PARAM_INVALID = 8; // 下单参数缺失
+  SF_UPDATE_ORDER_PARAM_INVALID = 9; // 订单确认/取消参数缺失
+  SF_WANTED_INTERCEPT_PARAM_INVALID = 10; // 截单转寄退回参数缺失
+  SF_FILTER_ORDER_BSP_PARAM_INVALID = 11; // 订单筛选参数缺失
+}

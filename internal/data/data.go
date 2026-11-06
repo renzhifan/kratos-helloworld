@@ -9,13 +9,13 @@ import (
 
 	"entgo.io/ent/dialect"
 	"github.com/go-kratos/kratos/v3/log"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewRedisClient, NewTodoRepo, NewTodoCache)
+var ProviderSet = wire.NewSet(NewData, NewRedisClient, NewTodoRepo, NewTodoCache, NewSfRepo)
 
 // Data holds the long-lived storage clients shared by repos.
 type Data struct {

@@ -90,7 +90,7 @@ func main() {
 	}
 	defer shutdownTrace()
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, appLogger)
+	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Sf, bc.Auth, appLogger)
 	if err != nil {
 		panic(err)
 	}
