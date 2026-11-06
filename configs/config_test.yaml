@@ -1,0 +1,55 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:50051
+    timeout: 1s
+data:
+  redis:
+    addr: r-2zek17pth685l7qy81pd.redis.rds.aliyuncs.com:6379
+    password: "cxrzrLDX9xWznd7S21MJ"
+    db: 16
+    dial_timeout: 1s
+    read_timeout: 0.2s
+    write_timeout: 0.2s
+logger:
+  # 最低输出级别：info/warn/error。请求日志与 Redis 命令日志都是 info 级别，
+  # 默认都写入 info 文件。
+  level: info
+  # 日志目录，按天按级别切分：info 文件只记录 info 日志，另有 warn/error
+  # 文件；为空时只输出到标准输出。
+  path: ./logs/
+  # 日志文件保留天数。
+  max_age: 7
+trace:
+  # 关闭时不再上报链路数据，但仍在本地生成 trace_id/span_id，
+  # 日志里会带上这两个字段。
+  enabled: false
+  # OTLP/HTTP 上报地址，Jaeger 1.35+ 原生支持，端口 4318。
+  endpoint: http://127.0.0.1:4318/v1/traces
+
+auth:
+  # 所有接口的调用方密钥，HTTP 请求头 X-Api-Key / gRPC metadata x-api-key，
+  # 为空时一律拒绝访问。
+  apiKey: "5df11cefa870d7bfc8a54d2205bb0b1b7841ea480cc20fe2"
+
+sf:
+  # 网关地址，沙箱 https://sfapi-sbox.sf-express.com 正式 https://bspgw.sf-express.com
+  host: https://sfapi-sbox.sf-express.com
+  # 顾客编码（合作伙伴编码 CustomerCode）
+  partnerID: "JXZHWEQ2TWU3"
+  # 校验码（合作伙伴密钥 checkWord），只在服务端申请访问令牌时使用，不下发
+  secret: "EwBkkpFzr3KxZENzKQGhj9h7ziDICQsX"
+  # 月结卡号，月结/货到付款下单必填
+  custID: "7551234567"
+  # 云打印面单模板编码，如 fm_150_standard_{partnerID}，在顺丰开放平台-模板管理中查看
+  templateCode: "fm_150_standard_JXZHWEQ2TWU3"
+  # 默认寄件人信息，下单未传寄件人时补齐
+  sender:
+    name: ""
+    mobile: ""
+    province: ""
+    city: ""
+    county: ""
+    address: ""
