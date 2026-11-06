@@ -1,11 +1,15 @@
 package server
 
 import (
+	"log/slog"
+
 	encryptv1 "logisticsServer/api/encrypt/v1"
 	v1 "logisticsServer/api/todo/v1"
 	"logisticsServer/internal/conf"
 	"logisticsServer/internal/service"
 
+	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
+	"github.com/go-kratos/kratos/v3/middleware/logging"
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	"github.com/go-kratos/kratos/v3/middleware/validate"
 	"github.com/go-kratos/kratos/v3/transport/http"
@@ -15,10 +19,13 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, encrypt *service.EncryptService) *http.Server {
+func NewHTTPServer(c *conf.Server, logger *slog.Logger, todo *service.TodoService, encrypt *service.EncryptService) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			// tracing 必须在 logging 之前，请求日志才能读到 span 的 trace_id/span_id。
+			tracing.Server(),
+			logging.Server(logger),
 			validate.Validator(func(req any) error {
 				if msg, ok := req.(proto.Message); ok {
 					if err := fieldbehavior.ValidateRequiredFields(msg); err != nil {

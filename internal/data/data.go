@@ -2,10 +2,13 @@ package data
 
 import (
 	"context"
+	"log/slog"
 
 	"logisticsServer/internal/conf"
 	"logisticsServer/internal/data/ent"
 
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v3/log"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/wire"
@@ -20,15 +23,20 @@ type Data struct {
 }
 
 // NewData opens the database client and returns it with a cleanup function.
-func NewData(c *conf.Data) (*Data, func(), error) {
+func NewData(c *conf.Data, logger *slog.Logger) (*Data, func(), error) {
 	dc := c.GetDatabase()
-	db, err := ent.Open(dc.GetDriver(), dc.GetSource())
+	drv, err := entsql.Open(dc.GetDriver(), dc.GetSource())
 	if err != nil {
 		return nil, nil, err
 	}
+	var driver dialect.Driver = drv
+	// Debug mode routes every statement through the service logger so SQL
+	// logs share the request's trace_id/span_id. Debug-level output only, so
+	// raise logger.level to debug to see them.
 	if dc.GetDebug() {
-		db = db.Debug()
+		driver = newSQLDriver(driver, logger)
 	}
+	db := ent.NewClient(ent.Driver(driver))
 	// Auto migration is a convenience for local development. In production,
 	// apply schema changes as a separate reviewed step instead.
 	if dc.GetAutoMigrate() {

@@ -8,6 +8,8 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Logger logger = 3;
+  Trace trace = 4;
 }
 
 message Server {
@@ -45,4 +47,23 @@ message Data {
   }
   Database database = 1;
   Redis redis = 2;
+}
+
+// Logger 日志输出配置。
+message Logger {
+  // 最低输出级别：info/warn/error。数据表 SQL 日志与请求日志均为 info 级别。
+  string level = 1;
+  // 日志目录，为空时只输出到标准输出。
+  string path = 2;
+  // 日志文件保留天数，0 时使用默认值 7 天。
+  int32 max_age = 3;
+}
+
+// Trace 链路追踪配置。
+message Trace {
+  // 是否通过 OTLP 上报链路数据。关闭时仍在本地生成 trace_id/span_id，
+  // 日志里的链路 ID 不会为空。
+  bool enabled = 1;
+  // OTLP/HTTP 上报地址，如 http://127.0.0.1:4318/v1/traces。
+  string endpoint = 2;
 }

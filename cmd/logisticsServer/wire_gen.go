@@ -24,7 +24,7 @@ import (
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData)
+	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -32,8 +32,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger) 
 	todoUsecase := biz.NewTodoUsecase(todoRepo)
 	todoService := service.NewTodoService(todoUsecase)
 	encryptService := service.NewEncryptService()
-	grpcServer := server.NewGRPCServer(confServer, todoService, encryptService)
-	httpServer := server.NewHTTPServer(confServer, todoService, encryptService)
+	grpcServer := server.NewGRPCServer(confServer, logger, todoService, encryptService)
+	httpServer := server.NewHTTPServer(confServer, logger, todoService, encryptService)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()
