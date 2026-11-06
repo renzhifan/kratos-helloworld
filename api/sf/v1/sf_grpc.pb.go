@@ -33,7 +33,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// Sf 顺丰开放平台能力
+// Sf 顺丰开放平台能力，仅提供 gRPC 接口
 type SfClient interface {
 	// GetAccessToken 获取顺丰访问令牌，服务端统一缓存，过期前自动刷新
 	GetAccessToken(ctx context.Context, in *GetAccessTokenRequest, opts ...grpc.CallOption) (*GetAccessTokenReply, error)
@@ -149,7 +149,7 @@ func (c *sfClient) ExpReceFilterOrderBsp(ctx context.Context, in *ExpReceFilterO
 // All implementations must embed UnimplementedSfServer
 // for forward compatibility.
 //
-// Sf 顺丰开放平台能力
+// Sf 顺丰开放平台能力，仅提供 gRPC 接口
 type SfServer interface {
 	// GetAccessToken 获取顺丰访问令牌，服务端统一缓存，过期前自动刷新
 	GetAccessToken(context.Context, *GetAccessTokenRequest) (*GetAccessTokenReply, error)

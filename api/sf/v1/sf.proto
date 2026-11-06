@@ -2,77 +2,38 @@ syntax = "proto3";
 
 package api.sf.v1;
 
-import "google/api/annotations.proto";
 import "google/protobuf/struct.proto";
 option go_package = "logisticsServer/api/sf/v1;v1";
 
-// Sf 顺丰开放平台能力
+// Sf 顺丰开放平台能力，仅提供 gRPC 接口
 service Sf {
   // GetAccessToken 获取顺丰访问令牌，服务端统一缓存，过期前自动刷新
-  rpc GetAccessToken (GetAccessTokenRequest) returns (GetAccessTokenReply) {
-    option (google.api.http) = {
-      get: "/v1/sf/accessToken"
-    };
-  };
+  rpc GetAccessToken (GetAccessTokenRequest) returns (GetAccessTokenReply);
 
   // GetConfig 获取顺丰调用配置，包含访问令牌、顾客编码、月结卡号与云打印面单模板编码
-  rpc GetConfig (GetConfigRequest) returns (GetConfigReply) {
-    option (google.api.http) = {
-      get: "/v1/sf/config"
-    };
-  };
+  rpc GetConfig (GetConfigRequest) returns (GetConfigReply);
 
   // ExpReceSearchOrderResp 订单结果查询（EXP_RECE_SEARCH_ORDER_RESP），
   // 用于未收到下单返回数据时，查询客户订单当前的处理状态
-  rpc ExpReceSearchOrderResp (ExpReceSearchOrderRespRequest) returns (ExpReceSearchOrderRespReply) {
-    option (google.api.http) = {
-      post: "/v1/sf/order/search"
-      body: "*"
-    };
-  };
+  rpc ExpReceSearchOrderResp (ExpReceSearchOrderRespRequest) returns (ExpReceSearchOrderRespReply);
 
   // ExpReceQueryDeliverTm 时效标准及价格查询（EXP_RECE_QUERY_DELIVERTM），
   // 根据寄收地址、重量与业务类型查询预计送达时间与运费
-  rpc ExpReceQueryDeliverTm (ExpReceQueryDeliverTmRequest) returns (ExpReceQueryDeliverTmReply) {
-    option (google.api.http) = {
-      post: "/v1/sf/deliverTm"
-      body: "*"
-    };
-  };
+  rpc ExpReceQueryDeliverTm (ExpReceQueryDeliverTmRequest) returns (ExpReceQueryDeliverTmReply);
 
   // ExpReceCreateOrder 下单（EXP_RECE_CREATE_ORDER），支持月结卡号与代收货款等增值服务
-  rpc ExpReceCreateOrder (ExpReceCreateOrderRequest) returns (ExpReceCreateOrderReply) {
-    option (google.api.http) = {
-      post: "/v1/sf/order/create"
-      body: "*"
-    };
-  };
+  rpc ExpReceCreateOrder (ExpReceCreateOrderRequest) returns (ExpReceCreateOrderReply);
 
   // ExpReceUpdateOrder 订单确认/取消（EXP_RECE_UPDATE_ORDER），dealType 1确认 2取消
-  rpc ExpReceUpdateOrder (ExpReceUpdateOrderRequest) returns (ExpReceUpdateOrderReply) {
-    option (google.api.http) = {
-      post: "/v1/sf/order/update"
-      body: "*"
-    };
-  };
+  rpc ExpReceUpdateOrder (ExpReceUpdateOrderRequest) returns (ExpReceUpdateOrderReply);
 
   // ExpReceWantedIntercept 截单转寄退回（EXP_RECE_WANTED_INTERCEPT），
   // 对在途运单下发转寄、退回、改派等拦截指令，派件出仓前有效
-  rpc ExpReceWantedIntercept (ExpReceWantedInterceptRequest) returns (ExpReceWantedInterceptReply) {
-    option (google.api.http) = {
-      post: "/v1/sf/wantedIntercept"
-      body: "*"
-    };
-  };
+  rpc ExpReceWantedIntercept (ExpReceWantedInterceptRequest) returns (ExpReceWantedInterceptReply);
 
   // ExpReceFilterOrderBsp 订单筛选（EXP_RECE_FILTER_ORDER_BSP），
   // 系统根据地址库判断订单是否可收派，支持一次筛选多个订单
-  rpc ExpReceFilterOrderBsp (ExpReceFilterOrderBspRequest) returns (ExpReceFilterOrderBspReply) {
-    option (google.api.http) = {
-      post: "/v1/sf/order/filter"
-      body: "*"
-    };
-  };
+  rpc ExpReceFilterOrderBsp (ExpReceFilterOrderBspRequest) returns (ExpReceFilterOrderBspReply);
 }
 
 message GetAccessTokenRequest {

@@ -3,7 +3,6 @@ package server
 import (
 	"log/slog"
 
-	sfv1 "logisticsServer/api/sf/v1"
 	v1 "logisticsServer/api/todo/v1"
 	"logisticsServer/internal/conf"
 	"logisticsServer/internal/service"
@@ -19,7 +18,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *service.TodoService, sf *service.SfService) *http.Server {
+func NewHTTPServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *service.TodoService) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -49,6 +48,5 @@ func NewHTTPServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *serv
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterTodoServiceHTTPServer(srv, todo)
-	sfv1.RegisterSfHTTPServer(srv, sf)
 	return srv
 }

@@ -7,7 +7,6 @@
 package v1
 
 import (
-	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
@@ -2897,7 +2896,7 @@ var File_sf_v1_sf_proto protoreflect.FileDescriptor
 
 const file_sf_v1_sf_proto_rawDesc = "" +
 	"\n" +
-	"\x0esf/v1/sf.proto\x12\tapi.sf.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1cgoogle/protobuf/struct.proto\"\x17\n" +
+	"\x0esf/v1/sf.proto\x12\tapi.sf.v1\x1a\x1cgoogle/protobuf/struct.proto\"\x17\n" +
 	"\x15GetAccessTokenRequest\"U\n" +
 	"\x13GetAccessTokenReply\x12 \n" +
 	"\vaccessToken\x18\x01 \x01(\tR\vaccessToken\x12\x1c\n" +
@@ -3177,16 +3176,16 @@ const file_sf_v1_sf_proto_rawDesc = "" +
 	"originCode\x18\x03 \x01(\tR\n" +
 	"originCode\x12\x1a\n" +
 	"\bdestCode\x18\x04 \x01(\tR\bdestCode\x12\x16\n" +
-	"\x06remark\x18\x05 \x01(\tR\x06remark2\xfe\a\n" +
-	"\x02Sf\x12n\n" +
-	"\x0eGetAccessToken\x12 .api.sf.v1.GetAccessTokenRequest\x1a\x1e.api.sf.v1.GetAccessTokenReply\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/sf/accessToken\x12Z\n" +
-	"\tGetConfig\x12\x1b.api.sf.v1.GetConfigRequest\x1a\x19.api.sf.v1.GetConfigReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/v1/sf/config\x12\x8a\x01\n" +
-	"\x16ExpReceSearchOrderResp\x12(.api.sf.v1.ExpReceSearchOrderRespRequest\x1a&.api.sf.v1.ExpReceSearchOrderRespReply\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/sf/order/search\x12\x84\x01\n" +
-	"\x15ExpReceQueryDeliverTm\x12'.api.sf.v1.ExpReceQueryDeliverTmRequest\x1a%.api.sf.v1.ExpReceQueryDeliverTmReply\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/v1/sf/deliverTm\x12~\n" +
-	"\x12ExpReceCreateOrder\x12$.api.sf.v1.ExpReceCreateOrderRequest\x1a\".api.sf.v1.ExpReceCreateOrderReply\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/sf/order/create\x12~\n" +
-	"\x12ExpReceUpdateOrder\x12$.api.sf.v1.ExpReceUpdateOrderRequest\x1a\".api.sf.v1.ExpReceUpdateOrderReply\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/sf/order/update\x12\x8d\x01\n" +
-	"\x16ExpReceWantedIntercept\x12(.api.sf.v1.ExpReceWantedInterceptRequest\x1a&.api.sf.v1.ExpReceWantedInterceptReply\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/sf/wantedIntercept\x12\x87\x01\n" +
-	"\x15ExpReceFilterOrderBsp\x12'.api.sf.v1.ExpReceFilterOrderBspRequest\x1a%.api.sf.v1.ExpReceFilterOrderBspReply\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/sf/order/filterB\x1eZ\x1clogisticsServer/api/sf/v1;v1b\x06proto3"
+	"\x06remark\x18\x05 \x01(\tR\x06remark2\x87\x06\n" +
+	"\x02Sf\x12R\n" +
+	"\x0eGetAccessToken\x12 .api.sf.v1.GetAccessTokenRequest\x1a\x1e.api.sf.v1.GetAccessTokenReply\x12C\n" +
+	"\tGetConfig\x12\x1b.api.sf.v1.GetConfigRequest\x1a\x19.api.sf.v1.GetConfigReply\x12j\n" +
+	"\x16ExpReceSearchOrderResp\x12(.api.sf.v1.ExpReceSearchOrderRespRequest\x1a&.api.sf.v1.ExpReceSearchOrderRespReply\x12g\n" +
+	"\x15ExpReceQueryDeliverTm\x12'.api.sf.v1.ExpReceQueryDeliverTmRequest\x1a%.api.sf.v1.ExpReceQueryDeliverTmReply\x12^\n" +
+	"\x12ExpReceCreateOrder\x12$.api.sf.v1.ExpReceCreateOrderRequest\x1a\".api.sf.v1.ExpReceCreateOrderReply\x12^\n" +
+	"\x12ExpReceUpdateOrder\x12$.api.sf.v1.ExpReceUpdateOrderRequest\x1a\".api.sf.v1.ExpReceUpdateOrderReply\x12j\n" +
+	"\x16ExpReceWantedIntercept\x12(.api.sf.v1.ExpReceWantedInterceptRequest\x1a&.api.sf.v1.ExpReceWantedInterceptReply\x12g\n" +
+	"\x15ExpReceFilterOrderBsp\x12'.api.sf.v1.ExpReceFilterOrderBspRequest\x1a%.api.sf.v1.ExpReceFilterOrderBspReplyB\x1eZ\x1clogisticsServer/api/sf/v1;v1b\x06proto3"
 
 var (
 	file_sf_v1_sf_proto_rawDescOnce sync.Once
