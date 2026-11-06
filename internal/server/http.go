@@ -3,9 +3,7 @@ package server
 import (
 	"log/slog"
 
-	v1 "logisticsServer/api/todo/v1"
 	"logisticsServer/internal/conf"
-	"logisticsServer/internal/service"
 
 	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
 	"github.com/go-kratos/kratos/v3/middleware/logging"
@@ -18,7 +16,9 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *service.TodoService) *http.Server {
+// proto 里的 google.api.http 注解已全部移除，当前没有注册任何 HTTP 路由，
+// 所有对外能力只通过 gRPC 暴露。
+func NewHTTPServer(c *conf.Server, a *conf.Auth, logger *slog.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -46,7 +46,5 @@ func NewHTTPServer(c *conf.Server, a *conf.Auth, logger *slog.Logger, todo *serv
 	if c.Http.Timeout != nil {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
-	srv := http.NewServer(opts...)
-	v1.RegisterTodoServiceHTTPServer(srv, todo)
-	return srv
+	return http.NewServer(opts...)
 }

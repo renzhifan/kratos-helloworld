@@ -31,6 +31,9 @@ func (h *redisLogger) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 	return func(ctx context.Context, cmd redis.Cmder) error {
 		start := time.Now()
 		err := next(ctx, cmd)
+		if skipLog([]redis.Cmder{cmd}, err) {
+			return err
+		}
 		h.log(ctx, time.Since(start), cmd.Name(), cmd.String(), err)
 		return err
 	}
@@ -41,6 +44,9 @@ func (h *redisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 	return func(ctx context.Context, cmds []redis.Cmder) error {
 		start := time.Now()
 		err := next(ctx, cmds)
+		if skipLog(cmds, err) {
+			return err
+		}
 		names := make([]string, 0, len(cmds))
 		for _, cmd := range cmds {
 			names = append(names, cmd.Name())
@@ -48,6 +54,43 @@ func (h *redisLogger) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.
 		h.log(ctx, time.Since(start), "pipeline", strings.Join(names, ","), err)
 		return err
 	}
+}
+
+// handshakeCommands 建连时客户端自动执行的命令，成功执行只是连接元信息，
+// 与业务无关，不必进访问日志。
+var handshakeCommands = map[string]struct{}{
+	"hello":  {}, // 建连握手，包含 AUTH 认证
+	"auth":   {}, // 老版本 Redis 单独认证
+	"select": {}, // 切换数据库
+	"client": {}, // CLIENT SETNAME / CLIENT SETINFO
+}
+
+// skipLog 判断这条记录是否没有保留价值：
+//   - 建连握手命令执行成功；这些命令每次建连都会出现，只说明连接建立
+//   - 老版本 Redis（<7.2）不支持 CLIENT SETINFO，go-redis 内部同样忽略该错误
+//
+// 握手失败（如密码错误）仍会记录，否则连接问题无从排查。
+func skipLog(cmds []redis.Cmder, err error) bool {
+	if len(cmds) == 0 {
+		return false
+	}
+	if err != nil {
+		if !strings.Contains(err.Error(), "setinfo") {
+			return false
+		}
+		for _, cmd := range cmds {
+			if cmd.Name() != "client" {
+				return false
+			}
+		}
+		return true
+	}
+	for _, cmd := range cmds {
+		if _, ok := handshakeCommands[cmd.Name()]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 // maxArgsLogLength 单条命令参数的最大记录长度。SET 会把整个列表缓存

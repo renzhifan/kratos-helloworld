@@ -25,6 +25,10 @@ func NewRedisClient(c *conf.Data, logger *slog.Logger) (*redis.Client, func(), e
 		Addr:     rc.GetAddr(),
 		Password: rc.GetPassword(),
 		DB:       int(rc.GetDb()),
+		// 建连时客户端会上报库名版本（CLIENT SETINFO），该命令 Redis 7.2 才支持。
+		// 线上实例是 6.0，会返回 "unknown subcommand 'setinfo'"，go-redis 内部
+		// 会忽略这个错误，但命令仍会经过日志 hook，表现为每次建连一条 ERROR。
+		DisableIdentity: true,
 	}
 	if d := rc.GetDialTimeout().AsDuration(); d > 0 {
 		opts.DialTimeout = d

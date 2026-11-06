@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package todo.v1;
 
-import "google/api/annotations.proto";
 import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/field_mask.proto";
@@ -20,70 +19,39 @@ service TodoService {
   // CreateTodo creates a new todo item and returns the persisted record
   // with the server-assigned id, created_at, and updated_at populated.
   // Returns INVALID_ARGUMENT if the request payload fails validation.
-  rpc CreateTodo (CreateTodoRequest) returns (Todo) {
-    option (google.api.http) = {
-      post: "/v1/todos/create"
-      body: "todo"
-    };
-  }
+  rpc CreateTodo (CreateTodoRequest) returns (Todo);
 
   // ListTodos returns a page of todo items, optionally filtered and ordered.
   // Use the next_page_token from TodoSet to retrieve subsequent pages.
   // Returns INVALID_ARGUMENT if filter, order_by, or page_token are malformed.
-  rpc ListTodos (ListTodosRequest) returns (TodoSet) {
-    option (google.api.http) = {
-      get: "/v1/todos/list"
-    };
-  }
+  rpc ListTodos (ListTodosRequest) returns (TodoSet);
 
   // GetTodo returns a single todo item by its id.
   // Returns NOT_FOUND if no todo exists with the supplied id.
-  rpc GetTodo (GetTodoRequest) returns (Todo) {
-    option (google.api.http) = {
-      get: "/v1/todos/{id}"
-    };
-  }
+  rpc GetTodo (GetTodoRequest) returns (Todo);
 
   // WatchTodos opens a server-side stream that emits a TodoEvent for every
   // create, update, or delete that matches the supplied filter and ordering.
   // The stream remains open until the client cancels or the server terminates it.
-  rpc WatchTodos (WatchTodosRequest) returns (stream TodoEvent) {
-    option (google.api.http) = {
-      get: "/v1/todos/watch"
-    };
-  }
+  rpc WatchTodos (WatchTodosRequest) returns (stream TodoEvent);
 
   // UpdateTodo applies a partial update to an existing todo item using a
   // FieldMask. Only the fields listed in update_mask are overwritten; all
   // other fields are left unchanged.
   // Returns NOT_FOUND if the target todo does not exist, or
   // INVALID_ARGUMENT if update_mask references unknown fields.
-  rpc UpdateTodo (UpdateTodoRequest) returns (Todo) {
-    option (google.api.http) = {
-      put: "/v1/todos/update"
-      body: "todo"
-    };
-  }
+  rpc UpdateTodo (UpdateTodoRequest) returns (Todo);
 
   // DeleteTodo soft-deletes a todo item by its id. The record is retained by
   // the server but no longer appears in GetTodo or ListTodos results.
   // Returns NOT_FOUND if no todo exists with the supplied id.
-  rpc DeleteTodo (DeleteTodoRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      delete: "/v1/todos/{id}"
-    };
-  }
+  rpc DeleteTodo (DeleteTodoRequest) returns (google.protobuf.Empty);
 
   // SyncTodos opens a bidirectional stream for two-way synchronization.
   // The client sends SyncTodoRequest messages describing local changes, and
   // the server pushes back TodoEvent messages reflecting the resulting state.
   // The stream stays open until either side closes it.
-  rpc SyncTodos (stream SyncTodoRequest) returns (stream TodoEvent) {
-    option (google.api.http) = {
-      post: "/v1/todos/sync"
-      body: "*"
-    };
-  }
+  rpc SyncTodos (stream SyncTodoRequest) returns (stream TodoEvent);
 }
 
 // TodoStatus is the lifecycle state of a todo item.

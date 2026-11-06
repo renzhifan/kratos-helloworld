@@ -19,6 +19,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 const (
@@ -40,6 +41,8 @@ const (
 	sfAccessTokenLockPoll = 200 * time.Millisecond
 	// sfAccessTokenExpireAhead 令牌过期提前量（秒），避免边界时间失效
 	sfAccessTokenExpireAhead = 20
+	// sfUnlockTimeout 释放分布式锁的超时时间
+	sfUnlockTimeout = 3 * time.Second
 	// sfHTTPTimeout 请求顺丰网关超时时间
 	sfHTTPTimeout = 30 * time.Second
 	// sfStdServicePath 顺丰统一入口接口路径，拼接在网关地址后面
@@ -428,7 +431,16 @@ func NewSfRepo(data *Data, logger *slog.Logger, c *conf.Sf) biz.SfRepo {
 		data:   data,
 		logger: logger,
 		conf:   c,
-		cli:    &http.Client{Timeout: sfHTTPTimeout},
+		// otelhttp 让每次网关调用都产生 client span 挂在当前请求 trace 下，
+		// 令牌申请与业务接口的耗时才看得见；span 名用方法与路径便于定位。
+		cli: &http.Client{
+			Timeout: sfHTTPTimeout,
+			Transport: otelhttp.NewTransport(http.DefaultTransport,
+				otelhttp.WithSpanNameFormatter(func(_ string, req *http.Request) string {
+					return req.Method + " " + req.URL.Path
+				}),
+			),
+		},
 	}
 }
 
@@ -451,7 +463,7 @@ func (r *sfRepo) GetAccessToken(ctx context.Context) (*biz.SfToken, error) {
 		// 未抢到锁，等待持锁实例把令牌写入缓存
 		return r.waitCachedToken(ctx)
 	}
-	defer r.unlock(lockValue)
+	defer r.unlock(ctx, lockValue)
 
 	// 拿到锁后再查一次，避免等待锁期间令牌已被其他实例刷新
 	if token, remain, err := r.getCachedToken(ctx); err != nil {
@@ -479,7 +491,15 @@ func (r *sfRepo) GetConfig(ctx context.Context) (*biz.SfConfig, error) {
 
 // getCachedToken 读取缓存中的访问令牌，token 为空表示未命中，remain 为剩余有效秒数
 func (r *sfRepo) getCachedToken(ctx context.Context) (string, int32, error) {
-	token, err := r.data.rdb.Get(ctx, sfAccessTokenCacheKey).Result()
+	// GET 与 TTL 用 pipeline 合并成一次往返，命中缓存时不再多花一个 RTT
+	pipe := r.data.rdb.Pipeline()
+	tokenCmd := pipe.Get(ctx, sfAccessTokenCacheKey)
+	ttlCmd := pipe.TTL(ctx, sfAccessTokenCacheKey)
+	if _, err := pipe.Exec(ctx); err != nil && !stderrors.Is(err, redis.Nil) {
+		r.logger.ErrorContext(ctx, "read sf access token cache failed", "err", err)
+		return "", 0, biz.ErrSfCacheFailed.WithCause(err)
+	}
+	token, err := tokenCmd.Result()
 	if err != nil {
 		if stderrors.Is(err, redis.Nil) {
 			return "", 0, nil
@@ -488,7 +508,7 @@ func (r *sfRepo) getCachedToken(ctx context.Context) (string, int32, error) {
 		return "", 0, biz.ErrSfCacheFailed.WithCause(err)
 	}
 	var remain int32
-	if ttl, ttlErr := r.data.rdb.TTL(ctx, sfAccessTokenCacheKey).Result(); ttlErr == nil && ttl > 0 {
+	if ttl, ttlErr := ttlCmd.Result(); ttlErr == nil && ttl > 0 {
 		remain = int32(ttl.Seconds())
 	}
 	return token, remain, nil
@@ -586,12 +606,13 @@ func (r *sfRepo) requestAccessToken(ctx context.Context) (*biz.SfToken, error) {
 }
 
 // unlock 释放访问令牌锁
-func (r *sfRepo) unlock(lockValue string) {
-	// 请求可能已结束或取消，释放锁单独使用独立上下文
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+func (r *sfRepo) unlock(ctx context.Context, lockValue string) {
+	// 请求可能已结束或取消：WithoutCancel 保留 trace 关联并脱钩取消信号，
+	// 再单独套一层超时，保证解锁既不会被提前中断，也不会阻塞返回。
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), sfUnlockTimeout)
 	defer cancel()
 	if err := sfUnlockScript.Run(ctx, r.data.rdb, []string{sfAccessTokenLockKey}, lockValue).Err(); err != nil {
-		r.logger.Error("release sf access token lock failed", "err", err)
+		r.logger.ErrorContext(ctx, "release sf access token lock failed", "err", err)
 	}
 }
 
