@@ -1,0 +1,9 @@
+# 构建上下文过滤：这些目录/文件不参与镜像构建
+bin/
+logs/
+.idea/
+.git/
+
+# macOS 与本地临时产物
+.DS_Store
+*.log
